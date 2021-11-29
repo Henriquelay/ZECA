@@ -1,8 +1,13 @@
 [package]
-name = "ZECA"
+name = "zeca"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+build = "build.rs"
 
 [dependencies]
+lalrpop-util = "0"
+regex = "1"
+
+# Add a build-time dependency on the lalrpop library:
+[build-dependencies]
+lalrpop = "0"
