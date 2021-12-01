@@ -1,0 +1,48 @@
+use std::str::FromStr;
+use crate::ast::{RESERVED, KEYWORD};
+
+grammar;
+
+// NonTerminal (CamelCase)
+// TERMINAL (SCREAMINGCASE)
+
+pub Program = {<Keyword>};
+
+// keywords
+Keyword: Box<KEYWORD> = {
+    r"as" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"break" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"const" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"continue" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"crate" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"else" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"enum" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"extern" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"false" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"fn" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"for" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"if" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"impl" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"in" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"let" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"loop" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"match" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"mod" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"move" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"mut" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"pub" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"ref" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"return" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"self" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"Self" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"static" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"struct" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"super" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"trait" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"true" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"type" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"unsafe" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"use" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"where" => Box::new(KEYWORD::try_from(<>).unwrap()),
+    r"while" => Box::new(KEYWORD::try_from(<>).unwrap()),
+};

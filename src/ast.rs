@@ -1,0 +1,87 @@
+use std::fmt::{Debug, Error, Formatter};
+
+pub enum KEYWORD {
+    AS,
+    BREAK,
+    CONST,
+    CONTINUE,
+    CRATE,
+    ELSE,
+    ENUM,
+    EXTERN,
+    FALSE,
+    FN,
+    FOR,
+    IF,
+    IMPL,
+    IN,
+    LET,
+    LOOP,
+    MATCH,
+    MOD,
+    MOVE,
+    MUT,
+    PUB,
+    REF,
+    RETURN,
+    SELFVALUE,
+    SELFTYPE,
+    STATIC,
+    STRUCT,
+    SUPER,
+    TRAIT,
+    TRUE,
+    TYPE,
+    UNSAFE,
+    USE,
+    WHERE,
+    WHILE,
+}
+pub enum RESERVED {
+    KEYWORD(KEYWORD)
+}
+
+impl TryFrom<&str> for KEYWORD {
+    type Error = String;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "as" => Ok(Self::AS),
+            "break" => Ok(Self::BREAK),
+            "const" => Ok(Self::CONST),
+            "continue" => Ok(Self::CONTINUE),
+            "crate" => Ok(Self::CRATE),
+            "else" => Ok(Self::ELSE),
+            "enum" => Ok(Self::ENUM),
+            "extern" => Ok(Self::EXTERN),
+            "false" => Ok(Self::FALSE),
+            "fn" => Ok(Self::FN),
+            "for" => Ok(Self::FOR),
+            "if" => Ok(Self::IF),
+            "impl" => Ok(Self::IMPL),
+            "in" => Ok(Self::IN),
+            "let" => Ok(Self::LET),
+            "loop" => Ok(Self::LOOP),
+            "match" => Ok(Self::MATCH),
+            "mod" => Ok(Self::MOD),
+            "move" => Ok(Self::MOVE),
+            "mut" => Ok(Self::MUT),
+            "pub" => Ok(Self::PUB),
+            "ref" => Ok(Self::REF),
+            "return" => Ok(Self::RETURN),
+            "self" => Ok(Self::SELFVALUE),
+            "Self" => Ok(Self::SELFTYPE),
+            "static" => Ok(Self::STATIC),
+            "struct" => Ok(Self::STRUCT),
+            "super" => Ok(Self::SUPER),
+            "trait" => Ok(Self::TRAIT),
+            "true" => Ok(Self::TRUE),
+            "type" => Ok(Self::TYPE),
+            "unsafe" => Ok(Self::UNSAFE),
+            "use" => Ok(Self::USE),
+            "where" => Ok(Self::WHERE),
+            "while" => Ok(Self::WHILE),
+            _ => Err(format!("Token '{}' is not a KEYWORD.", value)),
+        }
+    }
+
+}
