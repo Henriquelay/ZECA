@@ -1,52 +1,28 @@
 #[test]
 pub fn keywords() {
     let program_parser = crate::grammar::ProgramParser::new();
-    assert!(program_parser.parse("as").is_ok());
-    assert!(program_parser.parse("break").is_ok());
-    assert!(program_parser.parse("const").is_ok());
-    assert!(crate::grammar::ProgramParser::new()
-        .parse("continue")
-        .is_ok());
-    assert!(program_parser.parse("crate").is_ok());
-    assert!(program_parser.parse("else").is_ok());
-    assert!(program_parser.parse("enum").is_ok());
-    assert!(program_parser.parse("extern").is_ok());
-    assert!(program_parser.parse("false").is_ok());
-    assert!(program_parser.parse("fn").is_ok());
-    assert!(program_parser.parse("for").is_ok());
-    assert!(program_parser.parse("if").is_ok());
-    assert!(program_parser.parse("impl").is_ok());
-    assert!(program_parser.parse("in").is_ok());
-    assert!(program_parser.parse("let").is_ok());
-    assert!(program_parser.parse("loop").is_ok());
-    assert!(program_parser.parse("match").is_ok());
-    assert!(program_parser.parse("mod").is_ok());
-    assert!(program_parser.parse("move").is_ok());
-    assert!(program_parser.parse("mut").is_ok());
-    assert!(program_parser.parse("pub").is_ok());
-    assert!(program_parser.parse("ref").is_ok());
-    assert!(program_parser.parse("return").is_ok());
-    assert!(program_parser.parse("self").is_ok());
-    assert!(program_parser.parse("Self").is_ok());
-    assert!(program_parser.parse("static").is_ok());
-    assert!(program_parser.parse("struct").is_ok());
-    assert!(program_parser.parse("super").is_ok());
-    assert!(program_parser.parse("trait").is_ok());
-    assert!(program_parser.parse("true").is_ok());
-    assert!(program_parser.parse("type").is_ok());
-    assert!(program_parser.parse("unsafe").is_ok());
-    assert!(program_parser.parse("use").is_ok());
-    assert!(program_parser.parse("where").is_ok());
-    assert!(program_parser.parse("while").is_ok());
+    let ok_keywords = vec![
+        "as", "break", "const", "continue", "crate", "else", "enum", "extern", "false", "fn",
+        "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub", "ref",
+        "return", "self", "Self", "static", "struct", "super", "trait", "true", "type", "unsafe",
+        "use", "where", "while",
+    ];
 
-    assert!(program_parser.parse("something").is_err());
-    assert!(program_parser.parse("CONTINUE").is_err());
-    assert!(program_parser.parse("Continue").is_err());
-    assert!(program_parser.parse("CoNtInUe").is_err());
+    let bad_keywords = vec!["something", "CONTINUE", "Continue", "CoNtInUe"];
 
-    assert!(program_parser.parse("Yield").is_err());
-    assert!(program_parser.parse("YIELD").is_err());
-    assert!(program_parser.parse("YiElD").is_err());
+    let bad_weak_keywords = vec!["Yield", "YIELD", "YiElD"];
+
+    for kw in ok_keywords {
+        assert!(program_parser.parse(kw).is_ok());
+    }
+
+    for kw in bad_keywords {
+        assert!(program_parser.parse(kw).is_err());
+    }
+
+    for kw in bad_weak_keywords {
+        assert!(program_parser.parse(kw).is_err());
+    }
 }
 
 // Reserved for future use
