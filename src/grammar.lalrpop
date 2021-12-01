@@ -1,48 +1,82 @@
 use std::str::FromStr;
-use crate::ast::{RESERVED, KEYWORD};
+use crate::ast::*;
 
 grammar;
 
 // NonTerminal (CamelCase)
-// TERMINAL (SCREAMINGCASE)
+// TERMINAL (SCREAMING_SNAKE_CASE)
 
 pub Program = {<Keyword>};
 
 // keywords
-Keyword: Box<KEYWORD> = {
-    r"as" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"break" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"const" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"continue" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"crate" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"else" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"enum" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"extern" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"false" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"fn" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"for" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"if" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"impl" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"in" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"let" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"loop" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"match" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"mod" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"move" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"mut" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"pub" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"ref" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"return" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"self" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"Self" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"static" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"struct" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"super" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"trait" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"true" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"type" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"unsafe" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"use" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"where" => Box::new(KEYWORD::try_from(<>).unwrap()),
-    r"while" => Box::new(KEYWORD::try_from(<>).unwrap()),
+//  These keywords can only be used in their correct contexts. They cannot be used as the names of:
+// Items
+// Variables and function parameters
+// Fields and variants
+// Type parameters
+// Lifetime parameters or loop labels
+// Macros or attributes
+// Macro placeholders
+// Crates
+Keyword: KEYWORD = {
+    r"as" => KEYWORD::AS,
+    r"break" => KEYWORD::BREAK,
+    r"const" => KEYWORD::CONST,
+    r"continue" => KEYWORD::CONTINUE,
+    r"crate" => KEYWORD::CRATE,
+    r"else" => KEYWORD::ELSE,
+    r"enum" => KEYWORD::ENUM,
+    r"extern" => KEYWORD::EXTERN,
+    r"false" => KEYWORD::FALSE,
+    r"fn" => KEYWORD::FN,
+    r"for" => KEYWORD::FOR,
+    r"if" => KEYWORD::IF,
+    r"impl" => KEYWORD::IMPL,
+    r"in" => KEYWORD::IN,
+    r"let" => KEYWORD::LET,
+    r"loop" => KEYWORD::LOOP,
+    r"match" => KEYWORD::MATCH,
+    r"mod" => KEYWORD::MOD,
+    r"move" => KEYWORD::MOVE,
+    r"mut" => KEYWORD::MUT,
+    r"pub" => KEYWORD::PUB,
+    r"ref" => KEYWORD::REF,
+    r"return" => KEYWORD::RETURN,
+    r"self" => KEYWORD::SELFVALUE,
+    r"Self" => KEYWORD::SELFTYPE,
+    r"static" => KEYWORD::STATIC,
+    r"struct" => KEYWORD::STRUCT,
+    r"super" => KEYWORD::SUPER,
+    r"trait" => KEYWORD::TRAIT,
+    r"true" => KEYWORD::TRUE,
+    r"type" => KEYWORD::TYPE,
+    r"unsafe" => KEYWORD::UNSAFE,
+    r"use" => KEYWORD::USE,
+    r"where" => KEYWORD::WHERE,
+    r"while" => KEYWORD::WHILE,
+
+    // Reserved for future use
+    r"abstract" => unimplemented!(""),
+    r"become" => unimplemented!(""),
+    r"box" => unimplemented!(""),
+    r"do" => unimplemented!(""),
+    r"final" => unimplemented!(""),
+    r"macro" => unimplemented!(""),
+    r"override" => unimplemented!(""),
+    r"priv" => unimplemented!(""),
+    r"typeof" => unimplemented!(""),
+    r"unsized" => unimplemented!(""),
+    r"virtual" => unimplemented!(""),    
+    r"yield" => unimplemented!(""),
 };
+
+// Weak keywords
+// These keywords have special meaning only in certain contexts. For example, it is possible to declare a variable or method with the name union.
+// macro_rules is used to create custom macros.
+// union is used to declare a union and is only a keyword when used in a union declaration.
+// 'static is used for the static lifetime and cannot be used as a generic lifetime parameter or loop label
+WeakKeyword: WEAK_KEYWORD = {
+    r"macro_rules" => WEAK_KEYWORD::MACRO_RULES,
+    r"union" => WEAK_KEYWORD::UNION,
+    r"'static" => WEAK_KEYWORD::STATICLIFETIME,
+}
