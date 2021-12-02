@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types)]
 use std::fmt::{Debug, Error, Formatter};
 
-pub enum KEYWORD {
+pub enum Keyword {
     AS,
     BREAK,
     CONST,
@@ -25,8 +25,8 @@ pub enum KEYWORD {
     PUB,
     REF,
     RETURN,
-    SELFVALUE,
-    SELFTYPE,
+    SELF_VALUE,
+    SELF_TYPE,
     STATIC,
     STRUCT,
     SUPER,
@@ -39,13 +39,20 @@ pub enum KEYWORD {
     WHILE,
 }
 
-pub enum WEAK_KEYWORD {
+pub enum WeakKeyword {
     MACRO_RULES,
     UNION,
-    STATICLIFETIME,
+    STATIC_LIFETIME,
 }
 
-pub enum RESERVED {
-    KEYWORD(KEYWORD),
-    WEAK_KEYWORD(WEAK_KEYWORD),
+pub enum Reserved {
+    KEYWORD(Keyword),
+    WEAK_KEYWORD(WeakKeyword),
+}
+
+pub struct Identifier<'input>(pub &'input str);
+
+pub enum IdentifierOrReserved<'input> {
+    Identifier(Identifier<'input>),
+    Reserved(Reserved),
 }

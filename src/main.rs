@@ -6,8 +6,9 @@ lalrpop_mod!(pub grammar);
 pub mod ast;
 
 #[cfg(not(test))]
-fn main() {}
+fn main() {
+}
 
 
-#[cfg(test)]
+// #[cfg(test)]
 mod tests;

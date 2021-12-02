@@ -7,7 +7,9 @@ build = "build.rs"
 [dependencies]
 lalrpop-util = { version = "0", features = ["lexer"]}
 regex = "1"
+log = "0"
 
 # Add a build-time dependency on the lalrpop library:
 [build-dependencies]
+unicode-xid = "0.2"
 lalrpop = "0"
