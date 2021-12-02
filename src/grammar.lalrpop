@@ -10,7 +10,8 @@ pub Program = {<IdentifierOrReserved>};
 
 pub Comments = {
     r#"//.*"#,
-    r#"/\*[^(*/)]*|/\*\*/"#,
+    // TODO: Nested block comments
+    r#"/\*[^(*/)]*\*/"#,
 }
 
 pub IdentifierOrReserved: IdentifierOrReserved<'input> = {

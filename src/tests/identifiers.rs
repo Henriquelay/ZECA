@@ -11,9 +11,9 @@ pub fn itentifiers() {
         "foo",
         "_identifier",
         "_",
+        // FIXME update to unicode XID
         // "Москва",
         // "東京",
-        // FIXME update to unicode XID
         // "💯",
         // "r#true",
     ];
