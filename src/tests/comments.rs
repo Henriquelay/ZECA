@@ -17,6 +17,11 @@ pub fn comments() {
         "/** a double block comment **/",
         "/* should still be valid **/",
         "/*so should this*/",
+        "/* nested block comments 
+            /*
+                Should be fine
+             */
+        */",
         "/* this is
         multi line */",
         "/** this is

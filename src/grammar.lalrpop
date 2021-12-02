@@ -8,11 +8,19 @@ grammar;
 
 pub Program = {<IdentifierOrReserved>};
 
-pub Comments = {
-    r#"//.*"#,
-    // TODO: Nested block comments
-    r#"/\*[^(*/)]*\*/"#,
+pub Comments: () = {
+    LINE_COMMENT,
+    BlockComment,
 }
+
+LINE_COMMENT = r"//.*";
+
+BlockComment: () = {
+    "/*" BlockComment "*/",
+    BLOCK_COMMENT,
+};
+
+BLOCK_COMMENT = r"/\*.*\*/";
 
 pub IdentifierOrReserved: IdentifierOrReserved<'input> = {
     Reserved => IdentifierOrReserved::Reserved(<>),
@@ -110,7 +118,7 @@ pub Identifier: Identifier<'input> = {
 IDENTIFIER: Identifier<'input> = UNICODE_XID => Identifier(<>);
 RAW_IDENTIFIER: Identifier<'input> = "r#" <s:UNICODE_XID> => Identifier(s);
 
-UNICODE_XID = r##"[_A-Za-z][A-Za-z0-9]*"##;
+UNICODE_XID = r"[_A-Za-z][A-Za-z0-9]*";
 
 // http://unicode.org/cldr/utility/list-unicodeset.jsp?a=%5B%3AXID_Start%3A%5D&abb=on&g=&i=
 // http://unicode.org/cldr/utility/list-unicodeset.jsp?a=%5B%3AXID_Continue%3A%5D&abb=on&g=&i=
