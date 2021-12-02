@@ -11,7 +11,7 @@ pub fn keywords() {
         "use", "where", "while",
     ];
     let ok_weak_keywords = vec!["macro_rules", "union", "'static"];
-    let ok_test_suites = vec![ok_keywords, ok_weak_keywords];
+    let ok_test_suites = [ok_keywords, ok_weak_keywords];
 
     for suite in ok_test_suites {
         for kw in suite {
@@ -22,7 +22,7 @@ pub fn keywords() {
 
     let bad_keywords = vec!["something", "CONTINUE", "Continue", "CoNtInUe"];
     let bad_weak_keywords = vec!["Yield", "YIELD", "YiElD"];
-    let bad_test_suites = vec![bad_keywords, bad_weak_keywords];
+    let bad_test_suites = [bad_keywords, bad_weak_keywords];
 
     for swuite in bad_test_suites {
         for kw in swuite {
