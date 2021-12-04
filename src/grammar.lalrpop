@@ -20,7 +20,7 @@ BlockComment: () = {
     BLOCK_COMMENT,
 };
 
-BLOCK_COMMENT = r"/\*.*\*/";
+BLOCK_COMMENT = r"/\*(.|\n|\r)*\*/";
 
 pub IdentifierOrReserved: IdentifierOrReserved<'input> = {
     Reserved => IdentifierOrReserved::Reserved(<>),
@@ -30,21 +30,25 @@ pub IdentifierOrReserved: IdentifierOrReserved<'input> = {
 pub Reserved: Reserved = {
     KEYWORD => Reserved::KEYWORD(<>),
     WEAK_KEYWORD => Reserved::WEAK_KEYWORD(<>),
-    // Reserved for future use
     // Not using regex to not be ambiguous with identifiers
-    "abstract"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),   // I LIKE THE TECH
-    "become"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),     // I LIKE THE TECH
-    "box"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),        // I LIKE THE TECH
-    "do"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),         // I LIKE THE TECH
-    "final"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),      // I LIKE THE TECH
-    "macro"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),      // I LIKE THE TECH
-    "override"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),   // I LIKE THE TECH
-    "priv"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),       // I LIKE THE TECH
-    "typeof"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),     // I LIKE THE TECH
-    "unsized"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),    // I LIKE THE TECH
-    "virtual"  => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),    // I LIKE THE TECH
-    "yield" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),       // I LIKE THE TECH
+    FUTURE_USE
 };
+
+FUTURE_USE: Reserved = {
+    "abstract" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "become" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "box" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "do" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "final" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "macro" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "override" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "priv" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "typeof" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "unsized" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "virtual" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+    "yield" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+}; // I LIKE THE TECH 🥲
+
 
 // keywords
 // These keywords can only be used in their correct contexts. They cannot be used as the names of:

@@ -13,27 +13,27 @@ pub fn comments() {
     ];
     let ok_block_comments = vec![
         "/* a block comment */",
-        "   /* anoter block comment */     ",
+        "/* anoter block comment */",
         "/** a double block comment **/",
         "/* should still be valid **/",
         "/*so should this*/",
-        "/* nested block comments 
+        "/**/",
+        "/* this is
+        multi line */",
+        "/* /* */",
+        "/** this is
+        // multi line double **/",
+        "/* nested block comments
             /*
                 Should be fine
              */
         */",
-        "/* this is
-        multi line */",
-        "/** this is
-        multi line double **/",
-        "/**/",
-        "/* /* */",
     ];
 
     for suite in [ok_line_comments, ok_block_comments] {
         for comment in suite {
-            log::debug!("Testing {}", id);
-            assert!(identifier_parser.parse(id).is_ok());
+            log::debug!("Testing {}", comment);
+            assert!(comment_parser.parse(comment).is_ok());
         }
     }
 
@@ -44,14 +44,14 @@ pub fn comments() {
         "/* /",
         "/ */",
         "/*",
-        "something before /* comment */"
-        "/* comment */ something after"
+        "something before /* comment */",
+        "/* comment */ something after",
     ];
 
     for suite in [bad_line_comments, bad_block_comments] {
         for comment in suite {
-            log::debug!("Testing {}", id);
-            assert!(identifier_parser.parse(id).is_err());
+            log::debug!("Testing {}", comment);
+            assert!(comment_parser.parse(comment).is_err());
         }
     }
 }
