@@ -39,6 +39,50 @@ pub enum Keyword {
     WHILE,
 }
 
+impl TryFrom<&str> for Keyword {
+    type Error = String;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "as" => Ok(Keyword::AS),
+            "break" => Ok(Keyword::BREAK),
+            "const" => Ok(Keyword::CONST),
+            "continue" => Ok(Keyword::CONTINUE),
+            "crate" => Ok(Keyword::CRATE),
+            "else" => Ok(Keyword::ELSE),
+            "enum" => Ok(Keyword::ENUM),
+            "extern" => Ok(Keyword::EXTERN),
+            "false" => Ok(Keyword::FALSE),
+            "fn" => Ok(Keyword::FN),
+            "for" => Ok(Keyword::FOR),
+            "if" => Ok(Keyword::IF),
+            "impl" => Ok(Keyword::IMPL),
+            "in" => Ok(Keyword::IN),
+            "let" => Ok(Keyword::LET),
+            "loop" => Ok(Keyword::LOOP),
+            "match" => Ok(Keyword::MATCH),
+            "mod" => Ok(Keyword::MOD),
+            "move" => Ok(Keyword::MOVE),
+            "mut" => Ok(Keyword::MUT),
+            "pub" => Ok(Keyword::PUB),
+            "ref" => Ok(Keyword::REF),
+            "return" => Ok(Keyword::RETURN),
+            "self" => Ok(Keyword::SELF_VALUE),
+            "Self" => Ok(Keyword::SELF_TYPE),
+            "static" => Ok(Keyword::STATIC),
+            "struct" => Ok(Keyword::STRUCT),
+            "super" => Ok(Keyword::SUPER),
+            "trait" => Ok(Keyword::TRAIT),
+            "true" => Ok(Keyword::TRUE),
+            "type" => Ok(Keyword::TYPE),
+            "unsafe" => Ok(Keyword::UNSAFE),
+            "use" => Ok(Keyword::USE),
+            "where" => Ok(Keyword::WHERE),
+            "while" => Ok(Keyword::WHILE),
+            _ => Err(format!("'{}' is not a valid Keyword.", value)),
+        }
+    }
+}
+
 pub enum WeakKeyword {
     MACRO_RULES,
     UNION,

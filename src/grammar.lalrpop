@@ -3,6 +3,15 @@ use crate::ast::*;
 
 grammar;
 
+match {
+    r"//.*" => LINE_COMMENT,
+    r"/\*(.|\n|\r)*\*/" => BLOCK_COMMENT,
+    r"abstract|become|box|do|final|macro|override|priv|typeof|unsized|virtual|yield" => FUTURE_USE,
+    r"as|break|const|continue|crate|else|enum|extern|false|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|Self|static|struct|super|trait|true|type|unsafe|use|where|while" => KEYWORD,
+    r"'\\?.'" => CHARACTER_LITERAL,
+    _,
+}
+
 // NonTerminal (CamelCase)
 // TERMINAL (SCREAMING_SNAKE_CASE)
 
@@ -13,14 +22,14 @@ pub Comments: () = {
     BlockComment,
 }
 
-LINE_COMMENT = r"//.*";
-
 BlockComment: () = {
     "/*" BlockComment "*/",
     BLOCK_COMMENT,
 };
 
-BLOCK_COMMENT = r"/\*(.|\n|\r)*\*/";
+pub Literal = {
+    CHARACTER_LITERAL,
+}
 
 pub IdentifierOrReserved: IdentifierOrReserved<'input> = {
     Reserved => IdentifierOrReserved::Reserved(<>),
@@ -28,75 +37,26 @@ pub IdentifierOrReserved: IdentifierOrReserved<'input> = {
 };
 
 pub Reserved: Reserved = {
-    KEYWORD => Reserved::KEYWORD(<>),
+    KEYWORD => Reserved::KEYWORD(Keyword::try_from(<>).unwrap()),
     WEAK_KEYWORD => Reserved::WEAK_KEYWORD(<>),
     // Not using regex to not be ambiguous with identifiers
-    FUTURE_USE
+    FUTURE_USE => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
 };
 
-FUTURE_USE: Reserved = {
-    "abstract" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "become" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "box" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "do" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "final" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "macro" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "override" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "priv" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "typeof" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "unsized" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "virtual" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-    "yield" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-}; // I LIKE THE TECH 🥲
-
-
-// keywords
-// These keywords can only be used in their correct contexts. They cannot be used as the names of:
-// Items
-// Variables and function parameters
-// Fields and variants
-// Type parameters
-// Lifetime parameters or loop labels
-// Macros or attributes
-// Macro placeholders
-// Crates
-KEYWORD: Keyword = {
-    "as" => Keyword::AS,
-    "break" => Keyword::BREAK,
-    "const" => Keyword::CONST,
-    "continue" => Keyword::CONTINUE,
-    "crate" => Keyword::CRATE,
-    "else" => Keyword::ELSE,
-    "enum" => Keyword::ENUM,
-    "extern" => Keyword::EXTERN,
-    "false" => Keyword::FALSE,
-    "fn" => Keyword::FN,
-    "for" => Keyword::FOR,
-    "if" => Keyword::IF,
-    "impl" => Keyword::IMPL,
-    "in" => Keyword::IN,
-    "let" => Keyword::LET,
-    "loop" => Keyword::LOOP,
-    "match" => Keyword::MATCH,
-    "mod" => Keyword::MOD,
-    "move" => Keyword::MOVE,
-    "mut" => Keyword::MUT,
-    "pub" => Keyword::PUB,
-    "ref" => Keyword::REF,
-    "return" => Keyword::RETURN,
-    "self" => Keyword::SELF_VALUE,
-    "Self" => Keyword::SELF_TYPE,
-    "static" => Keyword::STATIC,
-    "struct" => Keyword::STRUCT,
-    "super" => Keyword::SUPER,
-    "trait" => Keyword::TRAIT,
-    "true" => Keyword::TRUE,
-    "type" => Keyword::TYPE,
-    "unsafe" => Keyword::UNSAFE,
-    "use" => Keyword::USE,
-    "where" => Keyword::WHERE,
-    "while" => Keyword::WHILE,
-};
+// FUTURE_USE: Reserved = {
+//     "abstract" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "become" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "box" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "do" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "final" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "macro" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "override" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "priv" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "typeof" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "unsized" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "virtual" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+//     "yield" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
+// }; // I LOVE THE TECH 🥲 💞
 
 // Weak keywords
 // These keywords have special meaning only in certain contexts. For example, it is possible to declare a variable or method with the name union.
