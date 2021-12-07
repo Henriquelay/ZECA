@@ -8,7 +8,8 @@ match {
     r"//[^\n\r]*[\n\r]*" => { }, // Skip `// comments`
     r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/" => { },  // Skip `/* comments */`
     r"abstract|become|box|do|final|macro|override|priv|typeof|unsized|virtual|yield" => FUTURE_USE,
-    r"as|break|const|continue|crate|else|enum|extern|false|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|Self|static|struct|super|trait|true|type|unsafe|use|where|while" => KEYWORD,
+    r"as|break|const|continue|crate|else|enum|extern|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|Self|static|struct|super|trait|type|unsafe|use|where|while" => KEYWORD,
+    r"true|false" => BOOL_KEYWORD,
     r"macro_rules|union|'static" => WEAK_KEYWORD,
     r"'\\?.'" => CHARACTER_LITERAL,
     r#""(.|\n|\r)*""# => STR_LITERAL,
@@ -24,8 +25,7 @@ pub Program = {<IdentifierOrReserved>};
 pub Literal: Literal<'input> = {
     BYTE_DATA_PREFIX? <CHARACTER_LITERAL> => Literal::CHARACTER_LITERAL(<>.chars().nth_back(1).unwrap()),
     BYTE_DATA_PREFIX? RAW_DATA_PREFIX? <STR_DATA> => <>,
-    "true" => Literal::BOOL_LITERAL(true),
-    "false" => Literal::BOOL_LITERAL(false),
+    BOOL_KEYWORD => Literal::BOOL_LITERAL(bool::from_str(<>).unwrap()),
 }
 
 RAW_DATA_PREFIX = "r";

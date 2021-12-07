@@ -15,9 +15,6 @@ pub fn characters() {
         log::debug!("Testing {}", c);
         assert!(literal_parser.parse(c).is_err());
     }
-
-    // TODO
-    let not_characters = ["fn", "'static", "struct"];
 }
 
 #[test]
@@ -41,9 +38,6 @@ pub fn byte_characters() {
         log::debug!("Testing {}", c);
         assert!(literal_parser.parse(c).is_err());
     }
-
-    // TODO
-    let not_characters = ["fn", "'static", "struct"];
 }
 
 #[test]
@@ -69,9 +63,6 @@ pub fn str() {
         log::debug!("Testing {}", s);
         assert!(literal_parser.parse(s).is_err());
     }
-
-    // TODO
-    let not_characters = ["fn", "'static", "struct"];
 }
 
 #[test]
@@ -97,9 +88,6 @@ pub fn byte_str() {
         log::debug!("Testing {}", s);
         assert!(literal_parser.parse(s).is_err());
     }
-
-    // TODO
-    let not_characters = ["fn", "'static", "struct"];
 }
 
 #[test]
@@ -125,9 +113,6 @@ pub fn raw_str() {
         log::debug!("Testing {}", s);
         assert!(literal_parser.parse(s).is_err());
     }
-
-    // TODO
-    let not_characters = ["fn", "'static", "struct"];
 }
 
 #[test]
@@ -153,7 +138,24 @@ pub fn raw_byte_str() {
         log::debug!("Testing {}", s);
         assert!(literal_parser.parse(s).is_err());
     }
+}
 
-    // TODO
-    let not_characters = ["fn", "'static", "struct"];
+#[test]
+pub fn bool() {
+    let literal_parser = crate::grammar::LiteralParser::new();
+
+    let ok_strs = [
+        "false", 
+        "true"
+    ];
+    for s in ok_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_ok());
+    }
+
+    let bad_strs = ["flase", "treu",    ];
+    for s in bad_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_err());
+    }
 }
