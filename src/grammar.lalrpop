@@ -23,14 +23,15 @@ pub Program = {<IdentifierOrReserved>};
 
 pub Literal: Literal<'input> = {
     BYTE_DATA_PREFIX? <CHARACTER_LITERAL> => Literal::CHARACTER_LITERAL(<>.chars().nth_back(1).unwrap()),
-    STR_LITERAL => Literal::STR_LITERAL(<>),
-    RAW_DATA_PREFIX "#" <RAW_STR_DATA> "#" => <>,
+    BYTE_DATA_PREFIX? RAW_DATA_PREFIX? <STR_DATA> => <>,
+    "true" => Literal::BOOL_LITERAL(true),
+    "false" => Literal::BOOL_LITERAL(false),
 }
 
 RAW_DATA_PREFIX = "r";
 BYTE_DATA_PREFIX = "b"; //
-RAW_STR_DATA: Literal<'input> = {
-    "#" <RAW_STR_DATA> "#" => <>,
+STR_DATA: Literal<'input> = {
+    "#" <STR_DATA> "#" => <>,
     STR_LITERAL => Literal::STR_LITERAL(<>),
 }
 

@@ -110,6 +110,7 @@ pub enum Reserved {
 pub enum Literal<'a> {
     CHARACTER_LITERAL(char),
     STR_LITERAL(&'a str),
+    BOOL_LITERAL(bool),
 }
 
 pub struct Identifier<'a>(pub &'a str);

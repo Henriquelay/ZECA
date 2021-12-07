@@ -73,3 +73,87 @@ pub fn str() {
     // TODO
     let not_characters = ["fn", "'static", "struct"];
 }
+
+#[test]
+pub fn byte_str() {
+    let literal_parser = crate::grammar::LiteralParser::new();
+
+    let ok_strs = [
+        r#"b"uma stringue""#,
+        r#"b"""#,
+        r#"b"\0 ocm escape""#,
+        r#"b"\\ \" teste teste fdc \n
+        aaaaa""#,
+        r##"b"\\ \" teste #t \# #este fdc \n
+        aaaaa""##,
+    ];
+    for s in ok_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_ok());
+    }
+
+    let bad_strs = [r#"b"'"#, r#"b"sem fechar"#];
+    for s in bad_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_err());
+    }
+
+    // TODO
+    let not_characters = ["fn", "'static", "struct"];
+}
+
+#[test]
+pub fn raw_str() {
+    let literal_parser = crate::grammar::LiteralParser::new();
+
+    let ok_strs = [
+        r###"r#"uma stringue vc parsearia agui"#"###,
+        // r###"r#""#"###,
+        // r###"r##"\0 ocm escape"##"###,
+        // r###"r#"\\ " teste teste fdc 
+        // aaaaa"#"###,
+        // r####"r##"\\ \" teste #t \# #este fdc \n
+        // aaaaa"##"####,
+    ];
+    for s in ok_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_ok());
+    }
+
+    let bad_strs = [r###"r"'"###, r###"r"sem fechar""###];
+    for s in bad_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_err());
+    }
+
+    // TODO
+    let not_characters = ["fn", "'static", "struct"];
+}
+
+#[test]
+pub fn raw_byte_str() {
+    let literal_parser = crate::grammar::LiteralParser::new();
+
+    let ok_strs = [
+        r###"br#"uma stringue vc parsearia agui"#"###,
+        // r###"br#""#"###,
+        // r###"br##"\0 ocm escape"##"###,
+        // r###"br#"\\ " teste teste fdc 
+        // aaaaa"#"###,
+        // r####"br##"\\ \" teste #t \# #este fdc \n
+        // aaaaa"##"####,
+    ];
+    for s in ok_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_ok());
+    }
+
+    let bad_strs = [r###"br"'"###, r###"br"sem fechar""###];
+    for s in bad_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_err());
+    }
+
+    // TODO
+    let not_characters = ["fn", "'static", "struct"];
+}
