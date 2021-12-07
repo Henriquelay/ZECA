@@ -11,6 +11,7 @@ match {
     r"as|break|const|continue|crate|else|enum|extern|false|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|Self|static|struct|super|trait|true|type|unsafe|use|where|while" => KEYWORD,
     r"macro_rules|union|'static" => WEAK_KEYWORD,
     r"'\\?.'" => CHARACTER_LITERAL,
+    r#""(.|\n|\r)*""# => STR_LITERAL,
     _, // https://github.com/lalrpop/lalrpop/issues/325
 }
 
@@ -30,7 +31,7 @@ pub Program = {<IdentifierOrReserved>};
 // };
 
 pub Literal: Literal<'input> = {
-    CHARACTER_LITERAL => Literal::CHARACTER({
+    CHARACTER_LITERAL => Literal::CHARACTER_LITERAL({
         // If it starts with '\'
         if <>.len() == 2 {
             <>.chars().nth(1)
@@ -38,6 +39,8 @@ pub Literal: Literal<'input> = {
             <>.chars().nth(0)
         }
     }.unwrap()),
+    STR_LITERAL => Literal::STR_LITERAL(<>),
+        
 }
 
 pub IdentifierOrReserved: IdentifierOrReserved<'input> = {

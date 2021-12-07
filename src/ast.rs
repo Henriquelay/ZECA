@@ -106,9 +106,10 @@ pub enum Reserved {
     WEAK_KEYWORD(WeakKeyword),
 }
 
+// https://doc.rust-lang.org/reference/expressions/literal-expr.html
 pub enum Literal<'a> {
-    CHARACTER(char),
-    STR(&'a str),
+    CHARACTER_LITERAL(char),
+    STR_LITERAL(&'a str),
 }
 
 pub struct Identifier<'a>(pub &'a str);
