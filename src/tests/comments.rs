@@ -37,13 +37,15 @@ pub fn comments() {
         }
     }
 
-    let bad_line_comments = vec!["not a comment", "something before // comment ", "", " "];
+    let bad_line_comments =
+        vec!["not a comment", "something before // comment ", "/incomplete", "/incomplete/" "", " "];
 
     let bad_block_comments = vec![
         "/*/",
         "/* /",
         "/ */",
         "/*",
+        "*/",
         "something before /* comment */",
         "/* comment */ something after",
     ];
