@@ -153,7 +153,7 @@ pub fn bool() {
         assert!(literal_parser.parse(s).is_ok());
     }
 
-    let bad_strs = ["flase", "treu",    ];
+    let bad_strs = ["flase", "treu", ""];
     for s in bad_strs {
         log::debug!("Testing {}", s);
         assert!(literal_parser.parse(s).is_err());

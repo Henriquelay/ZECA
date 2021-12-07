@@ -5,9 +5,9 @@ pub fn keywords() {
     let keyword_parser = crate::grammar::ReservedParser::new();
 
     let ok_keywords = vec![
-        "as", "break", "const", "continue", "crate", "else", "enum", "extern", "false", "fn",
+        "as", "break", "const", "continue", "crate", "else", "enum", "extern", "fn",
         "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub", "ref",
-        "return", "self", "Self", "static", "struct", "super", "trait", "true", "type", "unsafe",
+        "return", "self", "Self", "static", "struct", "super", "trait", "type", "unsafe",
         "use", "where", "while",
     ];
     let ok_weak_keywords = vec!["macro_rules", "union", "'static"];
