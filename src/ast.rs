@@ -89,14 +89,31 @@ pub enum WeakKeyword {
     STATIC_LIFETIME,
 }
 
+impl TryFrom<&str> for WeakKeyword {
+    type Error = String;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "macro_rules" => Ok(WeakKeyword::MACRO_RULES),
+            "union" => Ok(WeakKeyword::UNION),
+            "'static" => Ok(WeakKeyword::STATIC_LIFETIME),
+            _ => Err(format!("'{}' is not a valid WeakKeyword.", value)),
+        }
+    }
+}
+
 pub enum Reserved {
     KEYWORD(Keyword),
     WEAK_KEYWORD(WeakKeyword),
 }
 
-pub struct Identifier<'input>(pub &'input str);
+pub enum Literal<'a> {
+    CHARACTER(char),
+    STR(&'a str),
+}
 
-pub enum IdentifierOrReserved<'input> {
-    Identifier(Identifier<'input>),
+pub struct Identifier<'a>(pub &'a str);
+
+pub enum IdentifierOrReserved<'a> {
+    Identifier(Identifier<'a>),
     Reserved(Reserved),
 }

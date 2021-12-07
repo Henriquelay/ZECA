@@ -3,13 +3,15 @@ use crate::ast::*;
 
 grammar;
 
+// This names some regex terminals and set their precedence.
 match {
-    r"//.*" => LINE_COMMENT,
-    r"/\*(.|\n|\r)*\*/" => BLOCK_COMMENT,
+    r"//[^\n\r]*[\n\r]*" => { }, // Skip `// comments`
+    r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/" => { },  // Skip `/* comments */`
     r"abstract|become|box|do|final|macro|override|priv|typeof|unsized|virtual|yield" => FUTURE_USE,
     r"as|break|const|continue|crate|else|enum|extern|false|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|Self|static|struct|super|trait|true|type|unsafe|use|where|while" => KEYWORD,
+    r"macro_rules|union|'static" => WEAK_KEYWORD,
     r"'\\?.'" => CHARACTER_LITERAL,
-    _,
+    _, // https://github.com/lalrpop/lalrpop/issues/325
 }
 
 // NonTerminal (CamelCase)
@@ -17,18 +19,25 @@ match {
 
 pub Program = {<IdentifierOrReserved>};
 
-pub Comments: () = {
-    LINE_COMMENT,
-    BlockComment,
-}
+// pub Comments: () = {
+//     LINE_COMMENT,
+//     BlockComment,
+// }
 
-BlockComment: () = {
-    "/*" BlockComment "*/",
-    BLOCK_COMMENT,
-};
+// BlockComment: () = {
+//     "/*" BlockComment "*/",
+//     BLOCK_COMMENT,
+// };
 
-pub Literal = {
-    CHARACTER_LITERAL,
+pub Literal: Literal<'input> = {
+    CHARACTER_LITERAL => Literal::CHARACTER({
+        // If it starts with '\'
+        if <>.len() == 2 {
+            <>.chars().nth(1)
+        } else {
+            <>.chars().nth(0)
+        }
+    }.unwrap()),
 }
 
 pub IdentifierOrReserved: IdentifierOrReserved<'input> = {
@@ -38,40 +47,13 @@ pub IdentifierOrReserved: IdentifierOrReserved<'input> = {
 
 pub Reserved: Reserved = {
     KEYWORD => Reserved::KEYWORD(Keyword::try_from(<>).unwrap()),
-    WEAK_KEYWORD => Reserved::WEAK_KEYWORD(<>),
-    // Not using regex to not be ambiguous with identifiers
+    WEAK_KEYWORD => Reserved::WEAK_KEYWORD(WeakKeyword::try_from(<>).unwrap()),
     FUTURE_USE => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
 };
 
-// FUTURE_USE: Reserved = {
-//     "abstract" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "become" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "box" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "do" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "final" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "macro" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "override" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "priv" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "typeof" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "unsized" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "virtual" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-//     "yield" => unimplemented!("Keyword {:?} is not implemented. Panicking.", <>),
-// }; // I LOVE THE TECH 🥲 💞
-
-// Weak keywords
-// These keywords have special meaning only in certain contexts. For example, it is possible to declare a variable or method with the name union.
-// macro_rules is used to create custom macros.
-// union is used to declare a union and is only a keyword when used in a union declaration.
-// 'static is used for the static lifetime and cannot be used as a generic lifetime parameter or loop label
-WEAK_KEYWORD: WeakKeyword = {
-    "macro_rules" => WeakKeyword::MACRO_RULES,
-    "union" => WeakKeyword::UNION,
-    "'static" => WeakKeyword::STATIC_LIFETIME,
-};
 
 // Identifiers
 // Zero width non-joiner (ZWNJ U+200C) and zero width joiner (ZWJ U+200D) characters are not allowed in identifiers.
-
 pub Identifier: Identifier<'input> = {
     IDENTIFIER,
     RAW_IDENTIFIER,
@@ -82,6 +64,7 @@ pub Identifier: Identifier<'input> = {
 IDENTIFIER: Identifier<'input> = UNICODE_XID => Identifier(<>);
 RAW_IDENTIFIER: Identifier<'input> = "r#" <s:UNICODE_XID> => Identifier(s);
 
+// Do not include in match
 UNICODE_XID = r"[_A-Za-z][A-Za-z0-9]*";
 
 // http://unicode.org/cldr/utility/list-unicodeset.jsp?a=%5B%3AXID_Start%3A%5D&abb=on&g=&i=
