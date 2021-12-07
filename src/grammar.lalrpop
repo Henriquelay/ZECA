@@ -20,27 +20,18 @@ match {
 
 pub Program = {<IdentifierOrReserved>};
 
-// pub Comments: () = {
-//     LINE_COMMENT,
-//     BlockComment,
-// }
-
-// BlockComment: () = {
-//     "/*" BlockComment "*/",
-//     BLOCK_COMMENT,
-// };
 
 pub Literal: Literal<'input> = {
-    CHARACTER_LITERAL => Literal::CHARACTER_LITERAL({
-        // If it starts with '\'
-        if <>.len() == 2 {
-            <>.chars().nth(1)
-        } else {
-            <>.chars().nth(0)
-        }
-    }.unwrap()),
+    BYTE_DATA_PREFIX? <CHARACTER_LITERAL> => Literal::CHARACTER_LITERAL(<>.chars().nth_back(1).unwrap()),
     STR_LITERAL => Literal::STR_LITERAL(<>),
-        
+    RAW_DATA_PREFIX "#" <RAW_STR_DATA> "#" => <>,
+}
+
+RAW_DATA_PREFIX = "r";
+BYTE_DATA_PREFIX = "b"; //
+RAW_STR_DATA: Literal<'input> = {
+    "#" <RAW_STR_DATA> "#" => <>,
+    STR_LITERAL => Literal::STR_LITERAL(<>),
 }
 
 pub IdentifierOrReserved: IdentifierOrReserved<'input> = {

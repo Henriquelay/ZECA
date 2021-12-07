@@ -21,6 +21,32 @@ pub fn characters() {
 }
 
 #[test]
+pub fn byte_characters() {
+    let literal_parser = crate::grammar::LiteralParser::new();
+
+    let ok_characters = [
+        r#"b'c'"#, 
+        r#"b' '"#, 
+        r#"b'\\'"#, 
+        r#"b'\n'"#, 
+        r#"b'\0'"#
+        ];
+    for c in ok_characters {
+        log::debug!("Testing {}", c);
+        assert!(literal_parser.parse(c).is_ok());
+    }
+
+    let bad_characters = ["b''", "b'teste'"];
+    for c in bad_characters {
+        log::debug!("Testing {}", c);
+        assert!(literal_parser.parse(c).is_err());
+    }
+
+    // TODO
+    let not_characters = ["fn", "'static", "struct"];
+}
+
+#[test]
 pub fn str() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
