@@ -1,7 +1,7 @@
 use super::log;
 
 #[test]
-pub fn characters() {
+pub fn test_parser_characters() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
     let ok_characters = [r#"'c'"#, r#"' '"#, r#"'\\'"#, r#"'\n'"#, r#"'\0'"#];
@@ -18,7 +18,7 @@ pub fn characters() {
 }
 
 #[test]
-pub fn byte_characters() {
+pub fn test_parser_byte_characters() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
     let ok_characters = [r#"b'c'"#, r#"b' '"#, r#"b'\\'"#, r#"b'\n'"#, r#"b'\0'"#];
@@ -35,7 +35,7 @@ pub fn byte_characters() {
 }
 
 #[test]
-pub fn str() {
+pub fn test_parser_str() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
     let ok_strs = [
@@ -60,7 +60,7 @@ pub fn str() {
 }
 
 #[test]
-pub fn byte_str() {
+pub fn test_parser_byte_str() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
     let ok_strs = [
@@ -85,7 +85,7 @@ pub fn byte_str() {
 }
 
 #[test]
-pub fn raw_str() {
+pub fn test_parser_raw_str() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
     let ok_strs = [
@@ -110,7 +110,7 @@ pub fn raw_str() {
 }
 
 #[test]
-pub fn raw_byte_str() {
+pub fn test_parser_raw_byte_str() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
     let ok_strs = [
@@ -135,7 +135,7 @@ pub fn raw_byte_str() {
 }
 
 #[test]
-pub fn bool() {
+pub fn test_parser_bool() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
     let ok_strs = ["false", "true"];
@@ -152,7 +152,7 @@ pub fn bool() {
 }
 
 #[test]
-pub fn integer() {
+pub fn test_parser_integer() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
     let ok_strs = [
@@ -179,6 +179,31 @@ pub fn integer() {
     }
 
     let bad_strs = ["0.1", "0,1", "0invalidSuffix", "123AFB43", "0b_", "0b____"];
+    for s in bad_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_err());
+    }
+}
+
+#[test]
+pub fn test_parser_float() {
+    let literal_parser = crate::grammar::LiteralParser::new();
+
+    let ok_strs = [
+        "123.0f64",
+        "0.1f64",
+        "0.1f32",
+        "12E+99_f64",
+        "5f32",
+        "2.",
+        "2.0",
+    ];
+    for s in ok_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_ok());
+    }
+
+    let bad_strs = ["2", "2f16", "2f8", "2.f64", "2.E+99"];
     for s in bad_strs {
         log::debug!("Testing {}", s);
         assert!(literal_parser.parse(s).is_err());
