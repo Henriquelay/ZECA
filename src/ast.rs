@@ -111,6 +111,7 @@ pub enum Literal<'a> {
     CHARACTER_LITERAL(char),
     STR_LITERAL(&'a str),
     BOOL_LITERAL(bool),
+    INT_LITERAL(usize),
 }
 
 pub struct Identifier<'a>(pub &'a str);

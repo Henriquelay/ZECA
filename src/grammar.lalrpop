@@ -13,6 +13,10 @@ match {
     r"macro_rules|union|'static" => WEAK_KEYWORD,
     r"'\\?.'" => CHARACTER_LITERAL,
     r#""(.|\n|\r)*""# => STR_LITERAL,
+
+    // https://regexr.com/6b3gi
+    r"(0(x|o|b|))?[0-9a-fA-F]+" => INT_LITERAL,
+    r"_?([ui](8|16|32|64|128|size))" => INT_LITERAL_SUFFIX,
     _, // https://github.com/lalrpop/lalrpop/issues/325
 }
 
@@ -26,6 +30,7 @@ pub Literal: Literal<'input> = {
     BYTE_DATA_PREFIX? <CHARACTER_LITERAL> => Literal::CHARACTER_LITERAL(<>.chars().nth_back(1).unwrap()),
     BYTE_DATA_PREFIX? RAW_DATA_PREFIX? <STR_DATA> => <>,
     BOOL_KEYWORD => Literal::BOOL_LITERAL(bool::from_str(<>).unwrap()),
+    INT_LITERAL INT_LITERAL_SUFFIX? => <>,
 }
 
 RAW_DATA_PREFIX = "r";
@@ -33,6 +38,11 @@ BYTE_DATA_PREFIX = "b"; //
 STR_DATA: Literal<'input> = {
     "#" <STR_DATA> "#" => <>,
     STR_LITERAL => Literal::STR_LITERAL(<>),
+}
+
+INT_DATA: Literal<'input> = {
+    <INT_DATA> INT_LITERAL_SUFFIX => <>,
+    INT_DATA => Literal::INT_DATA(<>),
 }
 
 pub IdentifierOrReserved: IdentifierOrReserved<'input> = {
