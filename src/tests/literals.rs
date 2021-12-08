@@ -21,13 +21,7 @@ pub fn characters() {
 pub fn byte_characters() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
-    let ok_characters = [
-        r#"b'c'"#, 
-        r#"b' '"#, 
-        r#"b'\\'"#, 
-        r#"b'\n'"#, 
-        r#"b'\0'"#
-        ];
+    let ok_characters = [r#"b'c'"#, r#"b' '"#, r#"b'\\'"#, r#"b'\n'"#, r#"b'\0'"#];
     for c in ok_characters {
         log::debug!("Testing {}", c);
         assert!(literal_parser.parse(c).is_ok());
@@ -98,7 +92,7 @@ pub fn raw_str() {
         r###"r#"uma stringue vc parsearia agui"#"###,
         // r###"r#""#"###,
         // r###"r##"\0 ocm escape"##"###,
-        // r###"r#"\\ " teste teste fdc 
+        // r###"r#"\\ " teste teste fdc
         // aaaaa"#"###,
         // r####"r##"\\ \" teste #t \# #este fdc \n
         // aaaaa"##"####,
@@ -123,7 +117,7 @@ pub fn raw_byte_str() {
         r###"br#"uma stringue vc parsearia agui"#"###,
         // r###"br#""#"###,
         // r###"br##"\0 ocm escape"##"###,
-        // r###"br#"\\ " teste teste fdc 
+        // r###"br#"\\ " teste teste fdc
         // aaaaa"#"###,
         // r####"br##"\\ \" teste #t \# #este fdc \n
         // aaaaa"##"####,
@@ -144,16 +138,47 @@ pub fn raw_byte_str() {
 pub fn bool() {
     let literal_parser = crate::grammar::LiteralParser::new();
 
-    let ok_strs = [
-        "false", 
-        "true"
-    ];
+    let ok_strs = ["false", "true"];
     for s in ok_strs {
         log::debug!("Testing {}", s);
         assert!(literal_parser.parse(s).is_ok());
     }
 
     let bad_strs = ["flase", "treu", ""];
+    for s in bad_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_err());
+    }
+}
+
+#[test]
+pub fn integer() {
+    let literal_parser = crate::grammar::LiteralParser::new();
+
+    let ok_strs = [
+        "0",
+        "-1", // ?
+        "1",
+        "2",
+        "123",
+        "123i32",
+        "123u32",
+        "123_u32",
+        "0xff",
+        "0xff_u8",
+        "0o70",
+        "0o70_i16",
+        "0b1111_1111_1001_0000",
+        "0b1111_1111_1001_0000i64",
+        "0b________1",
+        "0usize",
+    ];
+    for s in ok_strs {
+        log::debug!("Testing {}", s);
+        assert!(literal_parser.parse(s).is_ok());
+    }
+
+    let bad_strs = ["0.1", "0,1", "0invalidSuffix", "123AFB43", "0b_", "0b____"];
     for s in bad_strs {
         log::debug!("Testing {}", s);
         assert!(literal_parser.parse(s).is_err());
