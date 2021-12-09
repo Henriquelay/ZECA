@@ -8,8 +8,8 @@ grammar;
 
 // This names some regex terminals and set their precedence.
 match {
-    r"//[^\n\r]*[\n\r]*" => { }, // Skip `// comments and newlines after`
-    r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/" => { },  // Skip `/* comments */`
+    r"//[^\n\r]*[\n\r]*" => { }, // Skip " // comments and newlines after" 
+    r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/" => { },  // Skip " /* comments */" 
 
     r"abstract|become|box|do|final|macro|override|priv|typeof|unsized|virtual|yield" => FUTURE_USE,
     r"as|break|const|continue|crate|else|enum|extern|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|Self|static|struct|super|trait|type|unsafe|use|where|while" => KEYWORD,
@@ -32,6 +32,53 @@ UNICODE_XID = r"[A-Za-z_][A-Za-z0-9]*";
 
 pub Program = {<IdentifierOrReserved>};
 
+pub Punctuation: () = {
+    "+", // Plus
+    "-", // Minus
+    "*", // Star
+    "/", // Slash
+    "%", // Percent
+    "^", // Caret
+    "!", // Not
+    "&", // And
+    "|", // Or
+    "&&", // AndAnd
+    "||", // OrOr
+    "<<", // Shl
+    ">>", // Shr
+    "+=", // PlusEq
+    "-=", // MinusEq
+    "*=", // StarEq
+    "/=", // SlashEq
+    "%=", // PercentEq
+    "^=", // CaretEq
+    "&=", // AndEq
+    "|=", // OrEq
+    "<<=", // ShlEq
+    ">>=", // ShrEq
+    "=", // Eq
+    "==", // EqEq
+    "!=", // Ne
+    ">", // Gt
+    "<", // Lt
+    ">=", // Ge
+    "<=", // Le
+    "@", // At
+    // "_", // Underscore
+    ".", // Dot
+    "..", // DotDot
+    "...", // DotDotDot
+    "..=", // DotDotEq
+    ",", // Comma
+    ";", // Semi
+    ":", // Colon
+    "::", // PathSep
+    "->", // RArrow
+    "=>", // FatArrow
+    "#", // Pound
+    "$", // Dollar
+    "?", // Question
+};
 
 pub Literal: Literal<'input> = {
     CHARACTER_LITERAL => Literal::CHARACTER_LITERAL(<>.chars().nth_back(1).unwrap()),
@@ -52,7 +99,10 @@ pub FloatingPointLiteral: () = {
 };
 
 FLOAT_EXPONENT = {
-    "E" r"\+|\-"? DEC_LITERAL 
+    "E" "+" DEC_LITERAL,
+    "E" "-" DEC_LITERAL,
+    "e" "+" DEC_LITERAL,
+    "e" "-" DEC_LITERAL,
 };
 
 INTEGER_SUFFIX = {
