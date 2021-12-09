@@ -1,4 +1,4 @@
 pub mod reserved;
-pub mod identifiers;
+pub mod identifier;
 // pub mod comments;
-pub mod literals;
+pub mod literal;

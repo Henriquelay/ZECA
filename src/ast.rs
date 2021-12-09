@@ -62,7 +62,7 @@ impl TryFrom<&str> for Keyword {
             "match" => Ok(Keyword::MATCH),
             "mod" => Ok(Keyword::MOD),
             "move" => Ok(Keyword::MOVE),
-            "mut" => Ok(Keyword::MUT),
+            "mut" => Ok(Keyword::MUT), 
             "pub" => Ok(Keyword::PUB),
             "ref" => Ok(Keyword::REF),
             "return" => Ok(Keyword::RETURN),
@@ -111,7 +111,9 @@ pub enum Literal<'a> {
     CHARACTER_LITERAL(char),
     STR_LITERAL(&'a str),
     BOOL_LITERAL(bool),
-    INT_LITERAL(usize),
+    // (value, size) size = 0 for usize/isize
+    UINT_LITERAL(u128, u8),
+    IINT_LITERAL(i128, u8),
     FLOAT_LITERAL(f64),
 }
 
