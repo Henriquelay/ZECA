@@ -160,16 +160,17 @@ pub fn bool() {
 mod numeric {
     #[test]
     pub fn integer() {
-        let literal_parser = crate::grammar::LiteralParser::new();
+        let literal_parser = crate::grammar::IntegerLiteralParser::new();
 
         let ok_strs = [
+            "0",
+            "123i32",
+            "123usize",
+            "123u32",
             "0usize",
-            "-1", // ?
+            // "-1", // ?
             "1isize",
             "2usize",
-            "123usize",
-            "123i32",
-            "123u32",
             "123_u32",
             "0xff",
             "0xff_u8",
@@ -194,15 +195,18 @@ mod numeric {
 
     #[test]
     pub fn float() {
-        let literal_parser = crate::grammar::LiteralParser::new();
+        let literal_parser = crate::grammar::FloatingPointLiteralParser::new();
 
         let ok_strs = [
+            "2.",
+            "12E+99",
+            "12.01E+99",
             "123.0f64",
             "0.1f64",
             "0.1f32",
-            "12E+99_f64",
             "5f32",
-            "2.",
+            "12E+99_f64",
+            "12.01E+99_f64",
             "2.0",
         ];
         for s in ok_strs {

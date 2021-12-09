@@ -19,57 +19,67 @@ match {
     r"'\\?.'" => CHARACTER_LITERAL,
     r#""(.|\n|\r|\\")*""# => STR_LITERAL, 
 
-    r"[0-9][0-9_]*" => DEC_LITERAL,
-    r"0b[0-1][0-1_]*" => BIN_LITERAL,
-    r"0o[0-7][0-7_]*" => OCT_LITERAL,
-    r"0x[0-9a-fA-F][0-9a-fA-F_]*" => HEX_LITERAL,
-
-    // https://regexr.com/6b3ib
-    // r"(2\.[0-9]*)|[0-9]+((\.[0-9]*)|(E\+[0-9]+))?(_?f(32|64))?" => FLOAT_LITERAL,
+    r"[0-9_]*[0-9][0-9_]*" => DEC_LITERAL,
+    r"0b[0-1_]*[0-1][0-1_]*" => BIN_LITERAL,
+    r"0o[0-7_]*[0-7][0-7_]*" => OCT_LITERAL,
+    r"0x[0-9a-fA-F_]*[0-9a-fA-F][0-9a-fA-F_]*" => HEX_LITERAL,
 } else {
-    r"[A-Za-z_][A-Za-z0-9]*" => UNICODE_XID,
     _,
 }
+
 // Do not include in above match {}
-// UNICODE_XID = r"[A-Za-z_][A-Za-z0-9]*";
+UNICODE_XID = r"[A-Za-z_][A-Za-z0-9]*";
 
 pub Program = {<IdentifierOrReserved>};
 
 
 pub Literal: Literal<'input> = {
-    CharacterContent,
+    CHARACTER_LITERAL => Literal::CHARACTER_LITERAL(<>.chars().nth_back(1).unwrap()),
     StrContent,
     BOOL_KEYWORD => Literal::BOOL_LITERAL(bool::from_str(<>).unwrap()),
-    LiteralUInt,
-    LiteralIInt,
+    IntegerLiteral => Literal::USIZE(0),
+    FloatingPointLiteral => Literal::USIZE(0),
 };
 
-CharacterContent: Literal<'input> = {
-    CHARACTER_LITERAL => Literal::CHARACTER_LITERAL(<>.chars().nth_back(1).unwrap()),
+pub IntegerLiteral = <IntegerDigits> INTEGER_SUFFIX?;
+
+// https://doc.rust-lang.org/reference/tokens.html#floating-point-literals
+pub FloatingPointLiteral: () = {
+    DEC_LITERAL ".",
+    DEC_LITERAL FLOAT_EXPONENT, 
+    DEC_LITERAL "." DEC_LITERAL FLOAT_EXPONENT?,
+    DEC_LITERAL ("." DEC_LITERAL)? FLOAT_EXPONENT? FLOAT_SUFFIX,
 };
 
-LiteralDigits = {
+FLOAT_EXPONENT = {
+    "E" r"\+|\-"? DEC_LITERAL 
+};
+
+INTEGER_SUFFIX = {
+    "usize",
+    "u8",
+    "u16",
+    "u32",
+    "u64",
+    "u128",
+    "isize",
+    "i8",
+    "i16",
+    "i32",
+    "i64",
+    "i128",
+};
+
+FLOAT_SUFFIX = {
+    "f32",
+    "f64",
+};
+
+IntegerDigits = {
     DEC_LITERAL,
     BIN_LITERAL,
     OCT_LITERAL,
     HEX_LITERAL,
-};
-
-LiteralUInt: Literal<'input> = {
-    <LiteralDigits> "_"* "u" "size"? => Literal::UINT_LITERAL(<>.parse::<u128>().unwrap(), 0),
-    <LiteralDigits> "_"* "u8" => Literal::UINT_LITERAL(<>.parse::<u128>().unwrap(), 8),
-    <LiteralDigits> "_"* "u16" => Literal::UINT_LITERAL(<>.parse::<u128>().unwrap(), 16),
-    <LiteralDigits> "_"* "u32" => Literal::UINT_LITERAL(<>.parse::<u128>().unwrap(), 32),
-    <LiteralDigits> "_"* "u64" => Literal::UINT_LITERAL(<>.parse::<u128>().unwrap(), 64),
-    <LiteralDigits> "_"* "u128" => Literal::UINT_LITERAL(<>.parse::<u128>().unwrap(), 128),
-};
-LiteralIInt: Literal<'input> = {
-    <LiteralDigits> "_"* "i" "size"? => Literal::IINT_LITERAL(<>.parse::<i128>().unwrap(), 0),
-    <LiteralDigits> "_"* "i8" => Literal::IINT_LITERAL(<>.parse::<i128>().unwrap(), 8),
-    <LiteralDigits> "_"* "i16" => Literal::IINT_LITERAL(<>.parse::<i128>().unwrap(), 16),
-    <LiteralDigits> "_"* "i32" => Literal::IINT_LITERAL(<>.parse::<i128>().unwrap(), 32),
-    <LiteralDigits> "_"* "i64" => Literal::IINT_LITERAL(<>.parse::<i128>().unwrap(), 64),
-    <LiteralDigits> "_"* "i128" => Literal::IINT_LITERAL(<>.parse::<i128>().unwrap(), 128),
 };
 
 StrContent: Literal<'input> = {
