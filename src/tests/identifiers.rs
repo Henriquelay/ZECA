@@ -1,5 +1,3 @@
-use super::log;
-
 #[test]
 pub fn itentifiers() {
     let identifier_parser = crate::grammar::IdentifierParser::new();
@@ -18,13 +16,13 @@ pub fn itentifiers() {
         // "r#true",
     ];
     for id in ok_identifiers {
-        log::debug!("Testing {}", id);
+        println!("Testing {}", id);
         assert!(identifier_parser.parse(id).is_ok());
     }
 
     let bad_identifiers = ["", " "];
     for id in bad_identifiers {
-        log::debug!("Testing {}", id);
+        println!("Testing {}", id);
         assert!(identifier_parser.parse(id).is_err());
     }
 

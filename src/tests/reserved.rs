@@ -1,5 +1,3 @@
-use super::log;
-
 #[test]
 pub fn keywords() {
     let keyword_parser = crate::grammar::ReservedParser::new();
@@ -15,7 +13,7 @@ pub fn keywords() {
 
     for suite in ok_test_suites {
         for kw in suite {
-            log::debug!("Testing {}", kw);
+            println!("Testing {}", kw);
             assert!(keyword_parser.parse(kw).is_ok());
         }
     }
@@ -26,7 +24,7 @@ pub fn keywords() {
 
     for swuite in bad_test_suites {
         for kw in swuite {
-            log::debug!("Testing {}", kw);
+            println!("Testing {}", kw);
             assert!(keyword_parser.parse(kw).is_err());
         }
     }
