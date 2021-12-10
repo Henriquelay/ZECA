@@ -30,55 +30,129 @@ match {
 // Do not include in above match {}
 UNICODE_XID = r"[A-Za-z_][A-Za-z0-9]*";
 
-pub Program = {<IdentifierOrReserved>};
+SEMI = ";";
+
+// https://doc.rust-lang.org/reference/statements.html
+Statement: () = {
+    SEMI,
+    // Item
+};
+
+LetStatement: () = {
+    "let" (":" "type")? Eq Expression
+};
+
+Expression: () = {
+    ExpressionWithoutBlock,
+    // ExpressionWithBlock,
+};
+
+ExpressionWithoutBlock: () = {
+    Literal,
+    OperatorExpression,
+};
+
+OperatorExpression: () = {
+    BORROW_EXPRESSION,
+    DEREFERENCE_EXPRESSION,
+}
+
+BORROW_EXPRESSION = And And? "mut"? Expression;
+DEREFERENCE_EXPRESSION = Star Expression;
 
 pub Punctuation: () = {
-    "+", // Plus
-    "-", // Minus
-    "*", // Star
-    "/", // Slash
-    "%", // Percent
-    "^", // Caret
-    "!", // Not
-    "&", // And
-    "|", // Or
-    "&&", // AndAnd
-    "||", // OrOr
-    "<<", // Shl
-    ">>", // Shr
-    "+=", // PlusEq
-    "-=", // MinusEq
-    "*=", // StarEq
-    "/=", // SlashEq
-    "%=", // PercentEq
-    "^=", // CaretEq
-    "&=", // AndEq
-    "|=", // OrEq
-    "<<=", // ShlEq
-    ">>=", // ShrEq
-    "=", // Eq
-    "==", // EqEq
-    "!=", // Ne
-    ">", // Gt
-    "<", // Lt
-    ">=", // Ge
-    "<=", // Le
-    "@", // At
-    // "_", // Underscore
-    ".", // Dot
-    "..", // DotDot
-    "...", // DotDotDot
-    "..=", // DotDotEq
-    ",", // Comma
-    ";", // Semi
-    ":", // Colon
-    "::", // PathSep
-    "->", // RArrow
-    "=>", // FatArrow
-    "#", // Pound
-    "$", // Dollar
-    "?", // Question
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Percent,
+    Caret,
+    Not,
+    And,
+    Or,
+    AndAnd,
+    OrOr,
+    Shl,
+    Shr,
+    PlusEq,
+    MinusEq,
+    StarEq,
+    SlashEq,
+    PercentEq,
+    CaretEq,
+    AndEq,
+    OrEq,
+    ShlEq,
+    ShrEq,
+    Eq,
+    EqEq,
+    Ne,
+    Gt,
+    Lt,
+    Ge,
+    Le,
+    At,
+    // Underscore,
+    Dot,
+    DotDot,
+    DotDotDot,
+    DotDotEq,
+    Comma,
+    Semi,
+    Colon,
+    PathSep,
+    RArrow,
+    FatArrow,
+    Pound,
+    Dollar,
+    Question,
 };
+
+Plus = "+";
+Minus = "-";
+Star = "*";
+Slash = "/";
+Percent = "%";
+Caret = "^";
+Not = "!";
+And = "&";
+Or = "|";
+AndAnd = "&&";
+OrOr = "||";
+Shl = "<<";
+Shr = ">>";
+PlusEq = "+=";
+MinusEq = "-=";
+StarEq = "*=";
+SlashEq = "/=";
+PercentEq = "%=";
+CaretEq = "^=";
+AndEq = "&=";
+OrEq = "|=";
+ShlEq = "<<=";
+ShrEq = ">>=";
+Eq = "=";
+EqEq = "==";
+Ne = "!=";
+Gt = ">";
+Lt = "<";
+Ge = ">=";
+Le = "<=";
+At = "@";
+// Underscore = "_";
+Dot = ".";
+DotDot = "..";
+DotDotDot = "...";
+DotDotEq = "..=";
+Comma = ",";
+Semi = ";";
+Colon = ":";
+PathSep = "::";
+RArrow = "->";
+FatArrow = "=>";
+Pound = "#";
+Dollar = "$";
+Question = "?";
 
 pub Literal: Literal<'input> = {
     CHARACTER_LITERAL => Literal::CHARACTER_LITERAL(<>.chars().nth_back(1).unwrap()),
@@ -92,10 +166,10 @@ pub IntegerLiteral = <IntegerDigits> INTEGER_SUFFIX?;
 
 // https://doc.rust-lang.org/reference/tokens.html#floating-point-literals
 pub FloatingPointLiteral: () = {
-    DEC_LITERAL ".",
+    DEC_LITERAL Dot,
     DEC_LITERAL FLOAT_EXPONENT, 
-    DEC_LITERAL "." DEC_LITERAL FLOAT_EXPONENT?,
-    DEC_LITERAL ("." DEC_LITERAL)? FLOAT_EXPONENT? FLOAT_SUFFIX,
+    DEC_LITERAL Dot DEC_LITERAL FLOAT_EXPONENT?,
+    DEC_LITERAL (Dot DEC_LITERAL)? FLOAT_EXPONENT? FLOAT_SUFFIX,
 };
 
 FLOAT_EXPONENT = {

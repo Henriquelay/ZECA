@@ -25,9 +25,6 @@ pub fn identifiers() {
         println!("Testing {}", id);
         assert!(identifier_parser.parse(id).is_err());
     }
-
-    // TODO
-    let not_identifiers = ["fn", "'static", "struct"];
 }
 
 pub fn raw_identifiers() {
@@ -56,9 +53,6 @@ pub fn raw_identifiers() {
         println!("Testing {}", id);
         assert!(identifier_parser.parse(id).is_err());
     }
-
-    // TODO
-    let not_identifiers = ["fn", "'static", "struct"];
 }
     
 
