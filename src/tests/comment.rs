@@ -1,5 +1,3 @@
-use super::log;
-
 #[test]
 pub fn comments() {
     let comment_parser = crate::grammar::CommentsParser::new();
@@ -32,7 +30,7 @@ pub fn comments() {
 
     for suite in [ok_line_comments, ok_block_comments] {
         for comment in suite {
-            log::debug!("Testing {}", comment);
+            println!("Testing {}", comment);
             assert!(comment_parser.parse(comment).is_ok());
         }
     }
@@ -52,7 +50,7 @@ pub fn comments() {
 
     for suite in [bad_line_comments, bad_block_comments] {
         for comment in suite {
-            log::debug!("Testing {}", comment);
+            println!("Testing {}", comment);
             assert!(comment_parser.parse(comment).is_err());
         }
     }
