@@ -5,10 +5,10 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
-lalrpop-util = { version = "0", features = ["lexer"]}
+lalrpop-util = { version = "0.19", features = ["lexer"]}
 regex = "1"
 
 # Add a build-time dependency on the lalrpop library:
 [build-dependencies]
 unicode-xid = "0.2"
-lalrpop = "0"
+lalrpop = "0.19"
