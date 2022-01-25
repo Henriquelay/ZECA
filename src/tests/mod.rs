@@ -1,4 +1,2 @@
-pub mod reserved;
-pub mod identifier;
-// pub mod comments;
-pub mod literal;
+pub mod lex;
+pub mod syntax;

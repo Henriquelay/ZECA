@@ -7,13 +7,13 @@ fn test() {
         // "_",
         ".", "..", "...", "..=", ",", ";", ":", "::", "->", "=>", "#", "$", "?",
     ];
-    for id in ok_identifiers {
+    for id in ok_punctuations {
         println!("Testing {}", id);
         assert!(punctuation_parser.parse(id).is_ok());
     }
 
-    let bad_identifiers = ["", " ", "sla", ":)"];
-    for id in bad_identifiers {
+    let bad_punctuations = ["", " ", "sla", ":)"];
+    for id in bad_punctuations {
         println!("Testing {}", id);
         assert!(punctuation_parser.parse(id).is_err());
     }
