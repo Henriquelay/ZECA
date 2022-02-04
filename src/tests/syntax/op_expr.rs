@@ -1,4 +1,4 @@
-#[cfg(not(test))]
+#[test]
 pub fn arithmetic_or_logical_expression() {
     let expr_parser = crate::grammar::ArithmeticOrLogicalExpressionParser::new();
     let ok_expr = [

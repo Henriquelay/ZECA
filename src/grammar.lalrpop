@@ -36,40 +36,35 @@ Statement: () = {
     // Item
 };
 
-// LetStatement: () = {
-//     "let" (":" "type")? EQ Expression
-// };
+LetStatement: () = {
+    "let" (":" "type")? EQ Expression
+};
 
-// pub Expression: () = {
-//     ExpressionWithoutBlock,
-//     // ExpressionWithBlock,
-// };
+pub Expression: () = {
+    ExpressionWithoutBlock,
+    // ExpressionWithBlock,
+};
 
-// pub ExpressionWithoutBlock: () = {
-//     LiteralExpression,
-//     OperatorExpression,
-//     // ContinueExpression,
-//     // BreakExpression,
-// };
+pub ExpressionWithoutBlock: () = {
+    LiteralExpression,
+    OperatorExpression,
+    // GroupedExpression
+    // ContinueExpression,
+    // BreakExpression,
+};
 
-// // It's literally this easy 🐸
-// pub OperatorExpression: () = {
-//     #[precedence(level="0")]
-//     GroupedExpression,
-//     // BORROW_EXPRESSION,
-//     // DEREFERENCE_EXPRESSION,
-//     // ErrorPropagationExpression,
-//     #[precedence(level="1")]
-//     NegationExpression,
-//     #[precedence(level="2")]
-//     ArithmeticOrLogicalExpression,
-//     // NegationExpression,
-//     // ComparisonExpression,
-//     // LazyBooleanExpression,
-//     // TypeCastExpression,
-//     // AssignmentExpression,
-//     // CompoundAssignmentExpression,
-// };
+// It's literally this easy 🐸
+pub OperatorExpression: () = {
+    // BORROW_EXPRESSION,
+    // DEREFERENCE_EXPRESSION,
+    // ErrorPropagationExpression,
+    // NegationExpression,
+    // ComparisonExpression,
+    // LazyBooleanExpression,
+    // TypeCastExpression,
+    // AssignmentExpression,
+    // CompoundAssignmentExpression,
+};
 
 // // BORROW_EXPRESSION = AND AND? "mut"? Expression;
 // // DEREFERENCE_EXPRESSION = STAR Expression;
@@ -79,57 +74,40 @@ Statement: () = {
 //     NOT ArithmeticOrLogicalExpression,
 // };
 
-// pub ArithmeticOrLogicalExpression: () = {
-//     #[precedence(level="0")]
-//     ArithmeticOrLogicalExpressionPrio0,
-//     #[precedence(level="1")]
-//     ArithmeticOrLogicalExpressionPrio1,
-//     #[precedence(level="2")]
-//     ArithmeticOrLogicalExpressionPrio2,
-//     #[precedence(level="3")]
-//     ArithmeticOrLogicalExpressionPrio3,
-// };
-
-// ArithmeticOrLogicalExpressionPrio0: () = {
-//     #[precedence(level="0")]
-//     <left: Expression> SHR <right: Expression> => (),
-//     #[precedence(level="1")] #[assoc(side="left")]
-//     <left: Expression> SHL <right: Expression> => (),
-//     #[precedence(level="2")] #[assoc(side="left")]
-//     <left: Expression> PERCENT <right: Expression> => (),
-//     #[precedence(level="3")] #[assoc(side="left")]
-//     <left: Expression> CARET <right: Expression> => (),
-// };
-// ArithmeticOrLogicalExpressionPrio1: () = {
-//     #[precedence(level="4")]
-//     <left: Expression> STAR <right: Expression> => (),
-//     #[precedence(level="5")] #[assoc(side="left")]
-//     <left: Expression> SLASH <right: Expression> => (),
-// };
-// ArithmeticOrLogicalExpressionPrio2: () = {
-//     #[precedence(level="6")] 
-//     <left: Expression> PLUS <right: Expression> => (),
-//     #[precedence(level="7")] #[assoc(side="left")]
-//     <left: Expression> MINUS <right: Expression> => (),
-//     #[precedence(level="8")] #[assoc(side="left")]
-//     <left: Expression> AND <right: Expression> => (),
-//     #[precedence(level="9")] #[assoc(side="left")]
-//     <left: Expression> OR <right: Expression> => (),
-// };
-// ArithmeticOrLogicalExpressionPrio3: () = {
-//     #[precedence(level="10")]
-//     <left: Expression> GT <right: Expression> => (),
-//     #[precedence(level="11")] #[assoc(side="left")]
-//     <left: Expression> LT <right: Expression> => (),
-//     #[precedence(level="12")] #[assoc(side="left")]
-//     <left: Expression> GE <right: Expression> => (),
-//     #[precedence(level="13")] #[assoc(side="left")]
-//     <left: Expression> LE <right: Expression> => (),
-//     #[precedence(level="14")] #[assoc(side="left")]
-//     <left: Expression> EQEQ <right: Expression> => (),
-//     #[precedence(level="15")] #[assoc(side="left")]
-//     <left: Expression> NE <right: Expression> => (),
-// };
+pub ArithmeticOrLogicalExpression: () = {
+    #[precedence(level="0")]
+    Expression => (),
+    #[precedence(level="1")] #[assoc(side="left")]
+    Expression SHL Expression => (),
+    #[precedence(level="1")] #[assoc(side="left")]
+    Expression PERCENT Expression => (),
+    #[precedence(level="1")] #[assoc(side="left")]
+    Expression CARET Expression => (),
+    #[precedence(level="2")]
+    Expression STAR Expression => (),
+    #[precedence(level="2")] #[assoc(side="left")]
+    Expression SLASH Expression => (),
+    #[precedence(level="3")] 
+    Expression PLUS Expression => (),
+    #[precedence(level="3")] #[assoc(side="left")]
+    Expression MINUS Expression => (),
+    #[precedence(level="3")] #[assoc(side="left")]
+    Expression AND Expression => (),
+    #[precedence(level="3")] #[assoc(side="left")]
+    Expression OR Expression => (),
+    #[precedence(level="4")]
+    Expression GT Expression => (),
+    #[precedence(level="4")] #[assoc(side="left")]
+    Expression LT Expression => (),
+    #[precedence(level="4")] #[assoc(side="left")]
+    Expression GE Expression => (),
+    #[precedence(level="4")] #[assoc(side="left")]
+    Expression LE Expression => (),
+    #[precedence(level="5")] #[assoc(side="left")]
+    Expression EQEQ Expression => (),
+    #[precedence(level="5")] #[assoc(side="left")]
+    Expression NE Expression => (),
+};
 
 // GroupedExpression = "(" Expression ")";
 
