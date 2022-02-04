@@ -35,6 +35,7 @@ pub fn arithmetic_or_logical_expression() {
         "123 >>",
         "123",
         "&",
+        "+-*/",
     ];
     for id in bad_expr {
         println!("Testing {}", id);
