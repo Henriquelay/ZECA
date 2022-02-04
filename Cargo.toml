@@ -10,5 +10,4 @@ regex = "1"
 
 # Add a build-time dependency on the lalrpop library:
 [build-dependencies]
-unicode-xid = "0.2"
 lalrpop = "0.19"
