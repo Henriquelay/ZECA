@@ -2,7 +2,7 @@
 mod str {
     #[test]
     pub fn characters() {
-        let literal_parser = crate::grammar::LiteralParser::new();
+        let literal_parser = crate::grammar::LiteralExpressionParser::new();
 
         let ok_characters = [r#"'c'"#, r#"' '"#, r#"'\\'"#, r#"'\n'"#, r#"'\0'"#];
         for c in ok_characters {
@@ -20,7 +20,7 @@ mod str {
     #[test]
     #[ignore]
     pub fn byte_characters() {
-        let literal_parser = crate::grammar::LiteralParser::new();
+        let literal_parser = crate::grammar::LiteralExpressionParser::new();
 
         let ok_characters = [r#"b'c'"#, r#"b' '"#, r#"b'\\'"#, r#"b'\n'"#, r#"b'\0'"#];
         for c in ok_characters {
@@ -37,7 +37,7 @@ mod str {
 
     #[test]
     pub fn str() {
-        let literal_parser = crate::grammar::LiteralParser::new();
+        let literal_parser = crate::grammar::LiteralExpressionParser::new();
 
         let ok_strs = [
             r#""uma stringue""#,
@@ -63,7 +63,7 @@ mod str {
     #[test]
     #[ignore]
     pub fn byte_str() {
-        let literal_parser = crate::grammar::LiteralParser::new();
+        let literal_parser = crate::grammar::LiteralExpressionParser::new();
 
         let ok_strs = [
             r#"b"uma stringue""#,
@@ -89,7 +89,7 @@ mod str {
     #[test]
     #[ignore]
     pub fn raw_str() {
-        let literal_parser = crate::grammar::LiteralParser::new();
+        let literal_parser = crate::grammar::LiteralExpressionParser::new();
 
         let ok_strs = [
             r###"r#"uma stringue vc parsearia agui"#"###,
@@ -115,7 +115,7 @@ mod str {
     #[test]
     #[ignore]
     pub fn raw_byte_str() {
-        let literal_parser = crate::grammar::LiteralParser::new();
+        let literal_parser = crate::grammar::LiteralExpressionParser::new();
 
         let ok_strs = [
             r###"br#"uma stringue vc parsearia agui"#"###,
@@ -141,7 +141,7 @@ mod str {
 
 #[test]
 pub fn bool() {
-    let literal_parser = crate::grammar::LiteralParser::new();
+    let literal_parser = crate::grammar::LiteralExpressionParser::new();
 
     let ok_strs = ["false", "true"];
     for s in ok_strs {
