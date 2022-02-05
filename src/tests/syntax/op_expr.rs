@@ -2,6 +2,8 @@
 pub fn arithmetic_or_logical_expression() {
     let expr_parser = crate::grammar::ArithmeticOrLogicalExpressionParser::new();
     let ok_expr = [
+        "123",
+        "123+123",
         "123 + 123",
         "123 - 123",
         "123 * 123",
@@ -12,6 +14,7 @@ pub fn arithmetic_or_logical_expression() {
         "123 | 123",
         "123 << 123",
         "123 >> 123",
+        "123+123+123",
     ];
     for id in ok_expr {
         println!("Testing {}", id);
@@ -21,14 +24,17 @@ pub fn arithmetic_or_logical_expression() {
     let bad_expr = [
         "",
         " ",
+        "+",
+        "-",
+        "*-%",
         "sla",
         ":)",
         "123 +",
         "123 -",
-        "123 *",
-        "123 /",
-        "123 %",
-        "123 ^",
+        "* 123",
+        "/ 123",
+        "% 123",
+        "^ 123",
         "123 &",
         "123 |",
         "123 <<",
