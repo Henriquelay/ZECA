@@ -1,13 +1,7 @@
 [package]
 name = "zeca"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
-build = "build.rs"
 
 [dependencies]
-lalrpop-util = { version = "0.19", features = ["lexer"]}
-regex = "1"
-
-# Add a build-time dependency on the lalrpop library:
-[build-dependencies]
-lalrpop = "0.19"
+chumsky = "0"
