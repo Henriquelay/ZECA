@@ -7,5 +7,3 @@ pub fn main() {
     println!("{result}");
 }
 
-#[cfg(test)]
-mod unittest;

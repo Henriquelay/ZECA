@@ -5,10 +5,10 @@ use chumsky::{prelude::*, text::Character};
 pub mod ast;
 
 /// Parses inline and block comments
-pub fn comment() -> impl Parser<char, (), Error = Simple<char>> {
-    let block_comment = just::<_, _, Simple<char>>("/*").then(take_until(just("*/"))).ignored();
+pub fn comment() -> impl Parser<char, Vec<()>, Error = Simple<char>> {
+    let block_comment = just::<_, _, Simple<char>>("/*").then(take_until(just("*/").then_ignore(end()))).ignored();
     let inline_comment = just::<_, _, Simple<char>>("//").then(take_until(text::newline().or(end()))).ignored();
-    block_comment.or(inline_comment).then_ignore(end())
+    block_comment.or(inline_comment).padded().repeated().then_ignore(end())
 }
 
 /// Parses identifiers (variable names) as per [`chumsky::text::ident()`]

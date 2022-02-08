@@ -7,6 +7,10 @@
 
 #![warn(missing_docs)]
 
+
+#[cfg(test)]
+mod unittest;
+
 pub mod parser;
 use chumsky::Parser;
 use parser::{ast::Expr, parser};
