@@ -47,7 +47,8 @@ Using Rustdoc's Cargo integration, if you have Rustdoc intalled (added by defaul
 ```sh
 cargo doc --package zeca --package chumsky --no-deps --release
 ```
-To build documentation website for ZECA and Chumsky, the major library used on this project.
+To build documentation website for ZECA and Chumsky, the major library used on this project.  
+Other dependencies are hidden to avoid confusion.
 
 Thanks a lot to Chumsky mantainers!
 
