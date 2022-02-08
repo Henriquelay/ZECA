@@ -6,6 +6,3 @@ edition = "2021"
 [dependencies]
 chumsky = "0"
 
-# `cargo doc --package zeca --package chumsky --no-deps` to generate docs
-# `cargo doc --package zeca --package chumsky --no-deps --release -- --default-theme=ayu` to generate release-mode (optimized) docs
-# --open may be used to open the page automatically
