@@ -7,8 +7,8 @@ pub mod ast;
 /// Parses inline and block comments
 pub fn comment() -> impl Parser<char, (), Error = Simple<char>> {
     let block_comment = just::<_, _, Simple<char>>("/*").then(take_until(just("*/"))).ignored();
-    let inline_comment = just::<_, _, Simple<char>>("//").then(take_until(text::newline())).ignored();
-    block_comment.or(inline_comment)
+    let inline_comment = just::<_, _, Simple<char>>("//").then(take_until(text::newline().or(end()))).ignored();
+    block_comment.or(inline_comment).then_ignore(end())
 }
 
 /// Parses identifiers (variable names) as per [`chumsky::text::ident()`]
