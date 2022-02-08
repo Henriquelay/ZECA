@@ -1,18 +1,24 @@
 # ZECA
 ## Zero Efficiency Compiler: Augmented
 ---
-Rust -> LLVM compiler written in Rust using [LALRPOP] library.
+Rust -> LLVM compiler written in Rust using [Chumsky] library.
 
 # Requirements
 * Rust 2021
 * Cargo
+* *Optional*: Rustdoc
 > To install/update Rust, follow [this link][Rust install] for instructions on the official website.
 
 # Using the compiler
 ## Without installation
 While in any folder withing the project, run:
 ```sh
-cargo run path/to/source/file # or alternatively
+cargo run --release path/to/source/file # or, alternatively:
+cargo r --release path/to/source/file
+```
+Or, to run in _debug mode_:
+```sh
+cargo run path/to/source/file # or, alternatively:
 cargo r path/to/source/file
 ```
 
@@ -21,23 +27,29 @@ While on project root folder, run:
 ```sh
 cargo install --path .
 ```
-
-This will add `zeca` to `$HOME/.cargo/bin` which should be in your `$PATH` if you installed through `rustup`. 
+This will build with release mode and add `zeca` to `$HOME/.cargo/bin` which should be in your `$PATH` if you installed Rust through `rustup`. 
 Then, simply call `zeca path/to/source/file`.
 
 # Tests
-Unit tests are avaiable under `src/test` as test modules for Cargo, as per [test crate][https://doc.rust-lang.org/stable/test/]'s specification.
+Unit tests are avaiable under `src/` as test modules for Cargo, and are discarded in the final build (virtue of using `--release` flag).  
+Integration tests are avaiable under `tests/` and may either read from example files (`tests/examples`) or input directly as hardcoded strings, when arbitrarialy deemed simples enough.
 
 ## Running tests
 While in any folder withing the project, run:
 ```sh
-cargo test # or alternatively
+cargo test # or, alternatively
 cargo t
 ```
+>Ignored tests are tests that were once in the compiler's scope but were simplified away. 
 
-Ignored tests are tests that were once in the compiler's score but were simplified away. 
-Integration tests are yet to be added.
+# Documentation
+Using Rustdoc's Cargo integration, if you have Rustdoc intalled (added by default if intalled by Rustup's toolchain) simply run:
+```sh
+cargo doc --package zeca --package chumsky --no-deps --release
+```
+To build documentation website for ZECA and Chumsky, the major library used on this project.
 
+Thanks a lot to Chumsky mantainers!
 
-[LALRPOP] https://github.com/lalrpop/lalrpop
-[Rust install] https://www.rust-lang.org/tools/install
+[Chumsky]: https://github.com/zesterer/chumsky
+[Rust install]: https://www.rust-lang.org/tools/install
