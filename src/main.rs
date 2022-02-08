@@ -51,18 +51,27 @@ pub enum Expr {
     },
 }
 
-mod literal;
-
 /// Parses the program for correct tokens and tokens order.
 fn parser() -> impl Parser<char, Expr, Error = Simple<char>> {
-    let ident = text::ident().padded();
+    let identifier = text::ident().padded();
 
     let expr = recursive(|expr| {
+        // TODO for radix != 10, preceded by 0b, 0t, 0x
         let int = text::int(10)
             .map(|s: String| Expr::Num(s.parse().unwrap()))
             .padded();
 
-        let call = ident
+        let float = text::int::<_, Simple<char>>(10)
+            .then_ignore(just('.'))
+            .then(text::int(10))
+            .map(|s: (String, String)| {
+                Expr::Num(format!("{}.{}", s.0, s.1).parse().unwrap())
+            })
+            .padded();
+
+        let number = float.or(int);
+
+        let call = identifier
             .then(
                 expr.clone()
                     .separated_by(just(','))
@@ -71,10 +80,10 @@ fn parser() -> impl Parser<char, Expr, Error = Simple<char>> {
             )
             .map(|(f, args)| Expr::Call(f, args));
 
-        let atom = int
+        let atom = number
             .or(expr.delimited_by(just('('), just(')')))
             .or(call)
-            .or(ident.map(Expr::Var));
+            .or(identifier.map(Expr::Var));
 
         let op = |c| just(c).padded();
 
@@ -110,7 +119,7 @@ fn parser() -> impl Parser<char, Expr, Error = Simple<char>> {
 
     let decl = recursive(|decl| {
         let r#let = text::keyword("let")
-            .ignore_then(ident)
+            .ignore_then(identifier)
             .then_ignore(just('='))
             .then(expr.clone())
             .then_ignore(just(';'))
@@ -122,8 +131,8 @@ fn parser() -> impl Parser<char, Expr, Error = Simple<char>> {
             });
 
         let r#fn = text::keyword("fn")
-            .ignore_then(ident)
-            .then(ident.repeated())
+            .ignore_then(identifier)
+            .then(identifier.repeated())
             .then_ignore(just('='))
             .then(expr.clone())
             .then_ignore(just(';'))
@@ -142,14 +151,18 @@ fn parser() -> impl Parser<char, Expr, Error = Simple<char>> {
 }
 
 /// Evaluates `Expr`'s  return value.
-fn eval<'a>(expr: &'a Expr, vars: &mut Vec<(&'a String, f64)>) -> Result<f64, String> {
+fn eval<'a>(
+    expr: &'a Expr,
+    vars: &mut Vec<(&'a String, f64)>,
+    funcs: &mut Vec<(&'a String, &'a [String], &'a Expr)>,
+) -> Result<f64, String> {
     match expr {
         Expr::Num(x) => Ok(*x),
-        Expr::Neg(a) => Ok(-eval(a, vars)?),
-        Expr::Add(a, b) => Ok(eval(a, vars)? + eval(b, vars)?),
-        Expr::Sub(a, b) => Ok(eval(a, vars)? - eval(b, vars)?),
-        Expr::Mul(a, b) => Ok(eval(a, vars)? * eval(b, vars)?),
-        Expr::Div(a, b) => Ok(eval(a, vars)? / eval(b, vars)?),
+        Expr::Neg(a) => Ok(-eval(a, vars, funcs)?),
+        Expr::Add(a, b) => Ok(eval(a, vars, funcs)? + eval(b, vars, funcs)?),
+        Expr::Sub(a, b) => Ok(eval(a, vars, funcs)? - eval(b, vars, funcs)?),
+        Expr::Mul(a, b) => Ok(eval(a, vars, funcs)? * eval(b, vars, funcs)?),
+        Expr::Div(a, b) => Ok(eval(a, vars, funcs)? / eval(b, vars, funcs)?),
         Expr::Var(name) => {
             if let Some((_, val)) = vars.iter().rev().find(|(var, _)| *var == name) {
                 Ok(*val)
@@ -158,13 +171,50 @@ fn eval<'a>(expr: &'a Expr, vars: &mut Vec<(&'a String, f64)>) -> Result<f64, St
             }
         }
         Expr::Let { name, rhs, then } => {
-            let rhs = eval(rhs, vars)?;
+            let rhs = eval(rhs, vars, funcs)?;
             vars.push((name, rhs));
-            let output = eval(then, vars);
+            let output = eval(then, vars, funcs);
             vars.pop();
             output
         }
-        _ => todo!(),
+        Expr::Call(name, args) => {
+            if let Some((_, arg_names, body)) =
+                funcs.iter().rev().find(|(var, _, _)| *var == name).copied()
+            {
+                if arg_names.len() == args.len() {
+                    let mut args = args
+                        .iter()
+                        .map(|arg| eval(arg, vars, funcs))
+                        .zip(arg_names.iter())
+                        .map(|(val, name)| Ok((name, val?)))
+                        .collect::<Result<_, String>>()?;
+                    vars.append(&mut args);
+                    let output = eval(body, vars, funcs);
+                    vars.truncate(vars.len() - args.len());
+                    output
+                } else {
+                    Err(format!(
+                        "Wrong number of arguments for function `{}`: expected {}, found {}",
+                        name,
+                        arg_names.len(),
+                        args.len(),
+                    ))
+                }
+            } else {
+                Err(format!("Cannot find function `{}` in scope", name))
+            }
+        }
+        Expr::Fn {
+            name,
+            args,
+            body,
+            then,
+        } => {
+            funcs.push((name, args, body));
+            let output = eval(then, vars, funcs);
+            funcs.pop();
+            output
+        }
     }
 }
 
@@ -172,7 +222,7 @@ fn main() {
     let src = std::fs::read_to_string(std::env::args().nth(1).unwrap()).unwrap();
 
     match parser().parse(src) {
-        Ok(ast) => match eval(&ast, &mut Vec::new()) {
+        Ok(ast) => match eval(&ast, &mut Vec::new(), &mut Vec::new()) {
             Ok(output) => println!("{:?}", output),
             Err(eval_err) => println!("Evaluation error: {}", eval_err),
         },
