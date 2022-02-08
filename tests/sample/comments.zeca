@@ -1,0 +1,8 @@
+let five = 5.03;
+// comentei
+let eight = 3 + five;
+/* comentei
+multi // linha
+* safoda *\  */
+fn add x y = x + y;
+add(five, eight)
