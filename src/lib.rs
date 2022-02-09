@@ -7,13 +7,12 @@
 
 #![warn(missing_docs)]
 
-
 #[cfg(test)]
 mod unittest;
 
 pub mod parser;
-use chumsky::Parser;
 use parser::{ast::Expr, parser};
+use chumsky::{Parser, prelude::end};
 
 /// Evaluates `Expr`'s  return value.
 fn eval<'a>(
@@ -85,14 +84,14 @@ fn eval<'a>(
 
 /// Evaluates souce string using [`parser()`]
 pub fn eval_source(src: String) -> Result<f64, Vec<String>> {
-    match parser().parse(src) {
-        Ok(ast) => match eval(&ast, &mut Vec::new(), &mut Vec::new()) {
+    match parser().then_ignore(end()).parse_recovery_verbose(src) {
+        (Some(ast), _) => match eval(&ast, &mut Vec::new(), &mut Vec::new()) {
             Ok(output) => Ok(output),
-            Err(eval_err) => Err(vec![format!("Evaluation error: {}", eval_err)]),
+            Err(eval_err) => Err(vec![format!("Evaluation error: {:?}", eval_err)]),
         },
-        Err(parse_errs) => Err(parse_errs
+        (None, parse_errs) => Err(parse_errs
             .into_iter()
-            .map(|e| format!("Parse error: {}", e))
+            .map(|e| format!("Parse error: {:?}", e))
             .collect()),
     }
 }

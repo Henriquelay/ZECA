@@ -1,0 +1,7 @@
+let five = 5.03;
+// some comments
+let eight = 3 + five;
+/* some more
+comments */
+fn add x y = x + y;
+add(five, eight)

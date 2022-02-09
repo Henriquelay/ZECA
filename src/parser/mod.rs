@@ -1,27 +1,33 @@
-//! Parses input stream and outputs the corresponding ASTs. Mostly calls to 
+//! Parses input stream and outputs the corresponding ASTs. Mostly calls to
 
 use chumsky::{prelude::*, text::Character};
 
 pub mod ast;
 
-/// Parses inline and block comments
-pub fn comment() -> impl Parser<char, Vec<()>, Error = Simple<char>> {
-    let block_comment = just::<_, _, Simple<char>>("/*").then(take_until(just("*/").then_ignore(end()))).ignored();
-    let inline_comment = just::<_, _, Simple<char>>("//").then(take_until(text::newline().or(end()))).ignored();
-    block_comment.or(inline_comment).padded().repeated().then_ignore(end())
+/// Parses a single inline or block comment
+pub fn comment() -> impl Parser<char, (), Error = Simple<char>> + Copy + Clone {
+    let inline_comment = just("//")
+        .ignore_then(take_until(text::newline()))
+        .ignored();
+    let single_block_comment = just("/*").ignore_then(take_until(just("*/"))).ignored();
+    single_block_comment.or(inline_comment)
 }
 
 /// Parses identifiers (variable names) as per [`chumsky::text::ident()`]
-pub fn identifier() -> impl Parser<char, <char as Character>::Collection, Error = Simple<char>> {
+pub fn identifier(
+) -> impl Parser<char, <char as Character>::Collection, Error = Simple<char>> + Copy + Clone {
     text::ident().padded()
 }
 
 /// Parses the program for correct tokens and tokens order.
+/// Finished parsers are stored into variables and no call should be made to the variable itself, only chaining methods.
+/// Should NOT expect any kind of end-of-file ([`end()`][chumsky::prelude::end()]), as it will interfere with unitary tests and instead should be prepended when [`parser.parse()`][chumsky::Parser::parse()] is called, usually with `then_ignore(end())`.
 pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
-    let identifier = text::ident().padded();
+    let comment = comment();
+
+    let identifier = identifier();
 
     let expr = recursive(|expr| {
-
         // TODO for radix != 10, preceded by 0b, 0t, 0x
         let integer = text::int(10)
             .map(|s: String| ast::Expr::Num(s.parse().unwrap()))
@@ -108,9 +114,8 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
                 then: Box::new(then),
             });
 
-        r#let.or(r#fn).or(expr).padded()
+        r#let.padded_by(comment.repeated()).or(r#fn).or(expr).padded()
     });
 
-    comment().padded().repeated().ignore_then(decl.then_ignore(end()))
-    // comment.padded().repeated()
+    decl
 }

@@ -1,5 +1,5 @@
 #[cfg(test)]
-use chumsky::Parser;
+use chumsky::{Parser, prelude::end};
 
 mod test_util;
 
@@ -10,13 +10,14 @@ fn comment() {
 
     let ok_comments = [
         vec![
-            "// this is a comment",
-            "//",
-            "// ",
-            "///",
-            "// this is a comment // this still is",
+            "// this is a comment\n",
+            "//\n",
+            "// \n",
+            "///\n",
+            "// this is a comment // this still is\n",
         ],
         vec![
+            "/* */",
             "/* a block comment */",
             "/* anoter block comment */",
             "/** a double block comment **/",
@@ -28,15 +29,15 @@ fn comment() {
             "/* /* */",
             "/** this is
         // multi line double **/",
-            "/* nested block comments
-            /*
-                Should be fine
-             */
-        */",
+        //TODO     "/* nested block comments
+        //     /*
+        //         Should be fine
+        //      */
+        // */",
         ],
     ];
 
-    test_util::ok(|s| comment_parser.parse(*s), ok_comments.iter().flatten());
+    test_util::ok(|s| comment_parser.then_ignore(end()).parse_recovery_verbose(*s), ok_comments.iter().flatten());
 
     let bad_comments = [
         vec![
@@ -58,5 +59,5 @@ fn comment() {
         ],
     ];
 
-    test_util::err(|s| comment_parser.parse(*s), bad_comments.iter().flatten());
+    test_util::err(|s| comment_parser.then_ignore(end()).parse_recovery_verbose(*s), bad_comments.iter().flatten());
 }
