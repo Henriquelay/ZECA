@@ -189,3 +189,87 @@ pub fn float() {
         bad_floats.iter(),
     );
 }
+
+#[test]
+pub fn identifiers() {
+    let identifier_parser = crate::parser::identifier;
+    let ok_identifiers = [
+        "x",
+        "variable",
+        "data",
+        "TEST",
+        "foo",
+        "_identifier",
+        "_",
+        // FIXME update to unicode XID
+        // "Москва",
+        // "東京",
+        // "💯",
+        // "r#true",
+    ];
+
+    test_util::ok(
+        |s| {
+            identifier_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        ok_identifiers.iter(),
+    );
+
+    let bad_identifiers = ["", " "];
+
+    test_util::err(
+        |s| {
+            identifier_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        bad_identifiers.iter(),
+    );
+}
+
+#[test]
+pub fn raw_identifiers() {
+    let identifier_parser = crate::parser::identifier;
+
+    let ok_identifiers = [
+        "r#x#",
+        "r#variable#",
+        "r#data#",
+        "r#TEST#",
+        "r#foo#",
+        "r#_identifier#",
+        "r#_#",
+        // FIXME update to unicode XID
+        // "Москва",
+        // "東京",
+        // "💯",
+        // "r#true",
+    ];
+
+    test_util::ok(
+        |s| {
+            identifier_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        ok_identifiers.iter(),
+    );
+
+    let bad_identifiers = ["r##", "r# #"];
+
+    test_util::err(
+        |s| {
+            identifier_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        bad_identifiers.iter(),
+    );
+}
+
