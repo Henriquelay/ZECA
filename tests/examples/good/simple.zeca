@@ -3,5 +3,6 @@ let five = 5.03;
 let eight = 3 + five;
 /* some more
 comments */
+let t = true;
 fn add x y = x + y;
 add(five, eight)

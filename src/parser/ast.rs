@@ -3,25 +3,27 @@
 /// Types for ZECA's expressions. Uses mostly native Rust types
 #[derive(Debug)]
 pub enum Expr {
-    /// Numbers. `f64` should be the largest upcastable number and calculations will be done with these.
-    Num(f64),
+    /// Numbers. Both integers and float
+    Num(Number),
+    /// True or false
+    Bool(bool),
 
-    /// Negation expression. Unary `-` operator.
+    /// Negation expression. Both things like `-1` and `!true`
     Neg(Box<Expr>),
-    /// Addition expression. Binary `+` operator.
+    /// Binary +
     Add(Box<Expr>, Box<Expr>),
-    /// Subtaction expression. Binary `-` operator.
+    /// Binary -
     Sub(Box<Expr>, Box<Expr>),
-    /// Multiplication expression. Binary `*` operator.
+    /// Binary *
     Mul(Box<Expr>, Box<Expr>),
-    /// Division expression. Binary `/` operator.
+    /// Binary /
     Div(Box<Expr>, Box<Expr>),
 
-    /// Variables. Inside is stored the symbol name.
+    /// Variable "calls"
     Var(String),
     /// Function call expression. `()` operator placed after a symbol, as in `foo()`.
     Call(String, Vec<Expr>),
-    /// Used to declare variables.
+    /// Variables declarations
     Let {
         /// Name defined to this symbol.
         name: String,
@@ -30,7 +32,7 @@ pub enum Expr {
         /// Evaluated after symbol's own evaluation.
         then: Box<Expr>,
     },
-    /// Used to declare functions
+    /// Function declaration
     Fn {
         /// Name defined to this symbol.
         name: String,
@@ -41,4 +43,13 @@ pub enum Expr {
         /// `Evaluated after symbol's own evaluation.
         then: Box<Expr>,
     },
+}
+
+/// Types for ZECA's expressions. Uses mostly native Rust types
+#[derive(Debug)]
+pub enum Number {
+    /// Integer numbers. -1, 0, 1
+    Integer(isize),
+    /// Real numbers
+    Float(f64),
 }

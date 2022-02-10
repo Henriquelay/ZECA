@@ -13,10 +13,38 @@ pub fn comment() -> impl Parser<char, (), Error = Simple<char>> + Copy + Clone {
     single_block_comment.or(inline_comment)
 }
 
-/// Parses identifiers (variable names) as per [`chumsky::text::ident()`]
+/// Parses identifiers (variable/function names), defined as per [`chumsky::text::ident()`]
 pub fn identifier(
 ) -> impl Parser<char, <char as Character>::Collection, Error = Simple<char>> + Copy + Clone {
     text::ident().padded()
+}
+
+/// Any number. Ints, float, str, etc.
+pub fn number() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+    // TODO for radix != 10, preceded by 0b, 0t, 0x
+    let integer = text::int(10)
+        .map(|s: String| ast::Expr::Num(ast::Number::Integer(s.parse().unwrap())))
+        .padded();
+
+    let float = text::int::<_, Simple<char>>(10)
+        .then_ignore(just('.'))
+        .then(text::digits(10))
+        .map(|s: (String, String)| {
+            ast::Expr::Num(ast::Number::Float(
+                format!("{}.{}", s.0, s.1).parse().unwrap(),
+            ))
+        })
+        .padded();
+
+    let number = float.or(integer);
+    number
+}
+
+/// True of false. Rejects on anything else
+pub fn boolean() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+    just("true")
+        .or(just("false"))
+        .map(|s| ast::Expr::Bool(s.parse().unwrap()))
 }
 
 /// Parses the program for correct tokens and tokens order.
@@ -28,18 +56,8 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
     let identifier = identifier();
 
     let expr = recursive(|expr| {
-        // TODO for radix != 10, preceded by 0b, 0t, 0x
-        let integer = text::int(10)
-            .map(|s: String| ast::Expr::Num(s.parse().unwrap()))
-            .padded();
-
-        let float = text::int::<_, Simple<char>>(10)
-            .then_ignore(just('.'))
-            .then(text::digits(10))
-            .map(|s: (String, String)| ast::Expr::Num(format!("{}.{}", s.0, s.1).parse().unwrap()))
-            .padded();
-
-        let number = float.or(integer);
+        let number = number();
+        let boolean = boolean();
 
         let call = identifier
             .then(
@@ -51,6 +69,7 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
             .map(|(f, args)| ast::Expr::Call(f, args));
 
         let atom = number
+            .or(boolean)
             .or(expr.delimited_by(just('('), just(')')))
             .or(call)
             .or(identifier.map(ast::Expr::Var));
@@ -114,7 +133,11 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
                 then: Box::new(then),
             });
 
-        r#let.or(r#fn).or(expr).padded_by(comment.padded().repeated()).padded()
+        r#let
+            .or(r#fn)
+            .or(expr)
+            .padded_by(comment.padded().repeated())
+            .padded()
     });
 
     decl

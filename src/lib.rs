@@ -11,8 +11,11 @@
 mod unittest;
 
 pub mod parser;
-use parser::{ast::Expr, parser};
-use chumsky::{Parser, prelude::end};
+use chumsky::{prelude::end, Parser};
+use parser::{
+    ast::{Expr, Number},
+    parser,
+};
 
 /// Evaluates `Expr`'s  return value.
 fn eval<'a>(
@@ -21,7 +24,12 @@ fn eval<'a>(
     funcs: &mut Vec<(&'a String, &'a [String], &'a Expr)>,
 ) -> Result<f64, String> {
     match expr {
-        Expr::Num(x) => Ok(*x),
+        Expr::Num(Number::Integer(x)) => Ok(*x as f64),
+        Expr::Num(Number::Float(x)) => Ok(*x),
+        Expr::Bool(x) => Ok(match x {
+            true => 1.0,
+            false => 0.0,
+        }),
         Expr::Neg(a) => Ok(-eval(a, vars, funcs)?),
         Expr::Add(a, b) => Ok(eval(a, vars, funcs)? + eval(b, vars, funcs)?),
         Expr::Sub(a, b) => Ok(eval(a, vars, funcs)? - eval(b, vars, funcs)?),
