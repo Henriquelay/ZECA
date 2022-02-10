@@ -83,7 +83,6 @@ pub fn bool() {
     test_util::ok(
         |s| {
             bool_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -96,7 +95,6 @@ pub fn bool() {
     test_util::err(
         |s| {
             bool_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -125,7 +123,6 @@ pub fn int() {
     test_util::ok(
         |s| {
             int_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -144,7 +141,6 @@ pub fn int() {
     test_util::err(
         |s| {
             int_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -168,7 +164,6 @@ pub fn float() {
     test_util::ok(
         |s| {
             float_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -182,7 +177,6 @@ pub fn float() {
     test_util::err(
         |s| {
             float_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -211,7 +205,6 @@ pub fn identifiers() {
     test_util::ok(
         |s| {
             identifier_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -223,7 +216,6 @@ pub fn identifiers() {
     test_util::err(
         |s| {
             identifier_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -253,7 +245,6 @@ pub fn raw_identifiers() {
     test_util::ok(
         |s| {
             identifier_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -265,7 +256,6 @@ pub fn raw_identifiers() {
     test_util::err(
         |s| {
             identifier_parser()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s) // ???
         },
@@ -287,7 +277,6 @@ fn symbols() {
     test_util::ok(
         |s| {
             symbols()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s)
         },
@@ -299,7 +288,6 @@ fn symbols() {
     test_util::err(
         |s| {
             symbols()
-                .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s)
         },
@@ -326,7 +314,6 @@ pub fn keywords() {
         test_util::ok(
             |s| {
                 keyword_parser
-                    .repeated()
                     .then_ignore(end())
                     .parse_recovery_verbose(*s)
             },
