@@ -36,13 +36,16 @@ fn comment() {
             //      */
             // */",
         ],
-        vec![
-            "// both types of comments,\n/*but only one str*/",
-        ],
+        vec!["// both types of comments,\n/*but only one str*/"],
     ];
 
     test_util::ok(
-        |s| comment_parser.repeated().then_ignore(end()).parse_recovery_verbose(*s),
+        |s| {
+            comment_parser
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s)
+        },
         ok_comments.iter().flatten(),
     );
 
@@ -69,5 +72,32 @@ fn comment() {
     test_util::err(
         |s| comment_parser.then_ignore(end()).parse_recovery_verbose(*s),
         bad_comments.iter().flatten(),
+    );
+}
+
+#[test]
+pub fn bool() {
+    let bool_parser = crate::parser::boolean;
+
+    let ok_bools = vec!["false", "true"];
+    test_util::ok(
+        |s| {
+            bool_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        ok_bools.iter(),
+    );
+
+    let bad_bools = ["flase", "treu", " ", "t", "r", "u", "e", "f", "a", "l", "s", "e"];
+    test_util::err(
+        |s| {
+            bool_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        bad_bools.iter(),
     );
 }
