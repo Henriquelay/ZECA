@@ -13,6 +13,6 @@ fn assert_file<P>(path: P)
 fn simple() {
     let expected_value = 13.06;
     let delta = 1e-10;
-    let val = assert_file("tests/example/good/simple.zeca");
+    let val = assert_file("tests/examples/good/simple.zeca");
     assert!(f64::abs(val - expected_value) < delta);
 }

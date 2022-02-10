@@ -1,5 +1,5 @@
 #[cfg(test)]
-use chumsky::{Parser, prelude::end};
+use chumsky::{prelude::end, Parser};
 
 mod test_util;
 
@@ -15,6 +15,7 @@ fn comment() {
             "// \n",
             "///\n",
             "// this is a comment // this still is\n",
+            "// this is a comment\n// two in a row!\n",
         ],
         vec![
             "/* */",
@@ -25,19 +26,25 @@ fn comment() {
             "/*so should this*/",
             "/**/",
             "/* this is
-        multi line */",
+            multi line */",
             "/* /* */",
             "/** this is
-        // multi line double **/",
-        //TODO     "/* nested block comments
-        //     /*
-        //         Should be fine
-        //      */
-        // */",
+            // multi line double **/",
+            //TODO     "/* nested block comments
+            //     /*
+            //         Should be fine
+            //      */
+            // */",
+        ],
+        vec![
+            "// both types of comments,\n/*but only one str*/",
         ],
     ];
 
-    test_util::ok(|s| comment_parser.then_ignore(end()).parse_recovery_verbose(*s), ok_comments.iter().flatten());
+    test_util::ok(
+        |s| comment_parser.repeated().then_ignore(end()).parse_recovery_verbose(*s),
+        ok_comments.iter().flatten(),
+    );
 
     let bad_comments = [
         vec![
@@ -59,5 +66,8 @@ fn comment() {
         ],
     ];
 
-    test_util::err(|s| comment_parser.then_ignore(end()).parse_recovery_verbose(*s), bad_comments.iter().flatten());
+    test_util::err(
+        |s| comment_parser.then_ignore(end()).parse_recovery_verbose(*s),
+        bad_comments.iter().flatten(),
+    );
 }

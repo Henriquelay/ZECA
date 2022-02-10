@@ -114,7 +114,7 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
                 then: Box::new(then),
             });
 
-        r#let.padded_by(comment.repeated()).or(r#fn).or(expr).padded()
+        r#let.or(r#fn).or(expr).padded_by(comment.padded().repeated()).padded()
     });
 
     decl
