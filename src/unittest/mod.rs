@@ -90,7 +90,9 @@ pub fn bool() {
         ok_bools.iter(),
     );
 
-    let bad_bools = ["flase", "treu", " ", "t", "r", "u", "e", "f", "a", "l", "s", "e"];
+    let bad_bools = [
+        "flase", "treu", " ", "t", "r", "u", "e", "f", "a", "l", "s", "e",
+    ];
     test_util::err(
         |s| {
             bool_parser()
@@ -101,3 +103,52 @@ pub fn bool() {
         bad_bools.iter(),
     );
 }
+
+#[test]
+pub fn int() {
+    // TODO: Separate parser for floats
+    let int_parser = crate::parser::number;
+
+    let ok_ints = vec![
+        "0", "123i32", "123usize", "123u32", "0usize", // "-1", // ?
+        "1isize", "2usize",
+        "123_u32",
+        // "0xff",
+        // "0xff_u8",
+        // "0o70",
+        // "0o70_i16",
+        // "0b1111_1111_1001_0000",
+        // "0b1111_1111_1001_0000i64",
+        // "0b________1",
+        // "0usize",
+    ];
+    test_util::ok(
+        |s| {
+            int_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        ok_ints.iter(),
+    );
+
+    let bad_ints = [
+        // "0.1", // Should be a bad integer as soon as the parsers are separated
+        "0,1",
+        "0invalidSuffix",
+        "123AFB43",
+        "0b_",
+        "0b____",
+    ];
+
+    test_util::err(
+        |s| {
+            int_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        bad_ints.iter(),
+    );
+}
+
