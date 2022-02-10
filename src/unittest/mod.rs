@@ -152,3 +152,40 @@ pub fn int() {
     );
 }
 
+#[test]
+pub fn float() {
+    // TODO: Separate parser for floats
+    let float_parser = crate::parser::number;
+
+    let ok_floats = vec![
+        "2.0", "2.", // "12E+99",
+        // "12.01E+99",
+        "123.0f64", "0.1f64", "0.1f32", "5f32",
+        // "12E+99_f64",
+        // "12.01E+99_f64",
+    ];
+
+    test_util::ok(
+        |s| {
+            float_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        ok_floats.iter(),
+    );
+
+    let bad_floats = vec![
+        "2", "2f16", "2f8", "2.f64", // "2.E+99"
+    ];
+
+    test_util::err(
+        |s| {
+            float_parser()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s) // ???
+        },
+        bad_floats.iter(),
+    );
+}
