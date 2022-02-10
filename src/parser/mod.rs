@@ -47,6 +47,11 @@ pub fn boolean() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + 
         .map(|s| ast::Expr::Bool(s.parse().unwrap()))
 }
 
+pub fn string() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone{
+    let string = text::char(40)
+    .map(|s| ast::Expr::String(s.parse().unwrap()))
+}
+
 /// Parses the program for correct tokens and tokens order.
 /// Finished parsers are stored into variables and no call should be made to the variable itself, only chaining methods.
 /// Should NOT expect any kind of end-of-file ([`end()`][chumsky::prelude::end()]), as it will interfere with unitary tests and instead should be prepended when [`parser.parse()`][chumsky::Parser::parse()] is called, usually with `then_ignore(end())`.
