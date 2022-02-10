@@ -273,3 +273,156 @@ pub fn raw_identifiers() {
     );
 }
 
+/*
+#[test]
+fn symbols() {
+    let symbols = crate::parser::symbols;
+    let ok_punctuations = [
+        "+", "-", "*", "/", "%", "^", "!", "&", "|", "&&", "||", "<<", ">>", "+=", "-=", "*=",
+        "/=", "%=", "^=", "&=", "|=", "<<=", ">>=", "=", "==", "!=", ">", "<", ">=", "<=", "@",
+        // "_",
+        ".", "..", "...", "..=", ",", ";", ":", "::", "->", "=>", "#", "$", "?",
+    ];
+
+    test_util::ok(
+        |s| {
+            symbols()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s)
+        },
+        ok_punctuations.iter(),
+    );
+
+    let bad_punctuations = ["", " ", "sla", ":)"];
+
+    test_util::err(
+        |s| {
+            symbols()
+                .repeated()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s)
+        },
+        bad_punctuations.iter(),
+    );
+}
+*/
+
+/*
+#[ignore]
+#[test]
+pub fn keywords() {
+    let keyword_parser = crate::parser::reserved;
+
+    let ok_keywords = vec![
+        "as", "break", "const", "continue", "crate", "else", "enum", "extern", "fn", "for", "if",
+        "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub", "ref", "return", "self",
+        "Self", "static", "struct", "super", "trait", "type", "unsafe", "use", "where", "while",
+    ];
+    let ok_weak_keywords = vec!["macro_rules", "union", "'static"];
+    let ok_test_suites = [ok_keywords, ok_weak_keywords];
+
+    for ok_suite in ok_test_suites {
+        test_util::ok(
+            |s| {
+                keyword_parser
+                    .repeated()
+                    .then_ignore(end())
+                    .parse_recovery_verbose(*s)
+            },
+            ok_suite.iter(),
+        );
+    }
+
+    let bad_keywords = vec!["something", "CONTINUE", "Continue", "CoNtInUe"];
+    let bad_weak_keywords = vec!["Yield", "YIELD", "YiElD"];
+    let bad_test_suites = [bad_keywords, bad_weak_keywords];
+
+    for bad_suite in bad_test_suites {
+        test_util::err(
+            |s| {
+                keyword_parser
+                    .repeated()
+                    .then_ignore(end())
+                    .parse_recovery_verbose(*s)
+            },
+            bad_suite.iter(),
+        );
+    }
+}
+*/
+
+/*
+// Reserved for future use. These cause the thread to panic and therefore can only be tested one by one
+#[test]
+#[should_panic(expected = r#"Keyword "abstract" is not implemented. Panicking."#)]
+fn reserved_for_future_use_abstract() {
+    crate::parser::reserved.parse("abstract");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "become" is not implemented. Panicking."#)]
+fn reserved_for_future_use_become() {
+    crate::parser::reserved.parse("become");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "box" is not implemented. Panicking."#)]
+fn reserved_for_future_use_box() {
+    crate::parser::reserved.parse("box");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "do" is not implemented. Panicking."#)]
+fn reserved_for_future_use_do() {
+    crate::parser::reserved.parse("do");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "final" is not implemented. Panicking."#)]
+fn reserved_for_future_use_final() {
+    crate::parser::reserved.parse("final");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "macro" is not implemented. Panicking."#)]
+fn reserved_for_future_use_macro() {
+    crate::parser::reserved.parse("macro");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "override" is not implemented. Panicking."#)]
+fn reserved_for_future_use_override() {
+    crate::parser::reserved.parse("override");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "priv" is not implemented. Panicking."#)]
+fn reserved_for_future_use_priv() {
+    crate::parser::reserved.parse("priv");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "typeof" is not implemented. Panicking."#)]
+fn reserved_for_future_use_typeof() {
+    crate::parser::reserved.parse("typeof");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "unsized" is not implemented. Panicking."#)]
+fn reserved_for_future_use_unsized() {
+    crate::parser::reserved.parse("unsized");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "virtual" is not implemented. Panicking."#)]
+fn reserved_for_future_use_virtual() {
+    crate::parser::reserved.parse("virtual");
+}
+
+#[test]
+#[should_panic(expected = r#"Keyword "yield" is not implemented. Panicking."#)]
+fn reserved_for_future_use_yield() {
+    crate::parser::reserved.parse("yield");
+}
+*/
