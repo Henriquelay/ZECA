@@ -10,6 +10,9 @@ pub enum Expr {
     /// String
     Str(String),
 
+    /// Comparation between 2 expr
+    Cmp(Comparation),
+
     /// Negation expression. Both things like `-1` and `!true`
     Neg(Box<Expr>),
     /// Binary +
@@ -54,4 +57,15 @@ pub enum Number {
     Integer(isize),
     /// Real numbers
     Float(f64),
+}
+
+/// Is this bigger than that?
+#[derive(Debug)]
+pub enum Comparation {
+    /// 2 > 1
+    GreaterThan(Box<Expr>, Box<Expr>),
+    /// 1 < 2
+    LesserThan(Box<Expr>, Box<Expr>),
+    /// 1 == 0 😳
+    Equals(Box<Expr>, Box<Expr>),
 }

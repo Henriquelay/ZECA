@@ -23,22 +23,31 @@ pub fn identifier(
 /// TODO for radix != 10, preceded by 0b, 0t, 0x
 pub fn integer() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
     text::int(10)
-    .map(|s: String| ast::Expr::Num(ast::Number::Integer(s.parse().unwrap())))
-    .padded()
+        .map(|s: String| ast::Expr::Num(ast::Number::Integer(s.parse().unwrap())))
+        .padded()
 }
+
+// /// Chupa
+// pub fn comparation() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+//     expr()
+//         .then(just(">").or(just("<")).or(just("==")))
+//         .then(expr()).map(sua mãe)
+// }
 
 /// Parses a floating-point number
 /// TODO scientific notation
 pub fn float() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
     text::int::<_, Simple<char>>(10)
-    .then_ignore(just('.'))
-    .then(text::digits(10).or_not())
-    .map(|s: (String, Option<String>)| {
-        ast::Expr::Num(ast::Number::Float(
-            format!("{}.{}", s.0, s.1.unwrap_or("".to_string())).parse().unwrap(),
-        ))
-    })
-    .padded()
+        .then_ignore(just('.'))
+        .then(text::digits(10).or_not())
+        .map(|s: (String, Option<String>)| {
+            ast::Expr::Num(ast::Number::Float(
+                format!("{}.{}", s.0, s.1.unwrap_or("".to_string()))
+                    .parse()
+                    .unwrap(),
+            ))
+        })
+        .padded()
 }
 
 /// Any number. Ints or floats.
@@ -55,11 +64,11 @@ pub fn boolean() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + 
 }
 
 /// Parses the string type. Does not support escaping.
-pub fn string() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone{
+pub fn string() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
     just('"')
         .ignore_then(take_until(just('"')))
         // .collect::<String>()
-        .map(|_ | ast::Expr::Bool(true))
+        .map(|_| ast::Expr::Bool(true))
 }
 
 /// Parses the program for correct tokens and tokens order.

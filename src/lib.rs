@@ -12,10 +12,7 @@ mod unittest;
 
 pub mod parser;
 use chumsky::{prelude::end, Parser};
-use parser::{
-    ast::{Expr, Number},
-    parser,
-};
+use parser::{ast::{Comparation, Expr, Number}, parser};
 
 /// Evaluates `Expr`'s  return value.
 fn eval<'a>(
@@ -32,6 +29,16 @@ fn eval<'a>(
             true => 1.0,
             false => 0.0,
         }),
+        // STUB -
+        Expr::Cmp(Comparation::LesserThan(a, b)) => Ok(
+            (eval(a, vars, funcs).unwrap() < eval(b, vars, funcs).unwrap()) as usize as f64
+        ),
+        Expr::Cmp(Comparation::GreaterThan(a, b)) => Ok(
+            (eval(a, vars, funcs).unwrap() > eval(b, vars, funcs).unwrap()) as usize as f64
+        ),
+        Expr::Cmp(Comparation::Equals(a, b)) => Ok(
+            (eval(a, vars, funcs).unwrap() == eval(b, vars, funcs).unwrap()) as usize as f64
+        ),
         //STUB - 
         Expr::Str(_) => Ok(572146.),
         Expr::Neg(a) => Ok(-eval(a, vars, funcs)?),
