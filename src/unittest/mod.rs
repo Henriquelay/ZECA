@@ -260,6 +260,40 @@ pub fn raw_identifiers() {
     );
 }
 
+#[test]
+// Ignored 🌹
+pub fn string() {
+    let string_parser = crate::parser::string;
+
+    let ok_identifiers = [r#""""#, r#""\""#, r#""uma string feliz :)""#];
+
+    test_util::ok(
+        |s| {
+            string_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s)
+        },
+        ok_identifiers.iter(),
+    );
+
+    let bad_identifiers = [
+        r#"string triste :("#,
+        r#"""#,
+        r#""string sem fechar"#,
+        r#"''"#,
+        r#"'test'"#,
+    ];
+
+    test_util::err(
+        |s| {
+            string_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s)
+        },
+        bad_identifiers.iter(),
+    );
+}
+
 /*
 #[test]
 fn symbols() {
