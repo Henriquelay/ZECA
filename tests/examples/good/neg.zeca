@@ -1,0 +1,8 @@
+let x = - 5.03;
+// some comments
+let y = -3 - x;
+/* some more
+comments */
+let t = true;
+fn add x y = x + y;
+add(x, y)
