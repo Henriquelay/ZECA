@@ -5,8 +5,7 @@ mod test_util;
 
 #[test]
 fn comment() {
-    use crate::parser::comment as comment_parser;
-    let comment_parser = comment_parser();
+    let comment_parser = crate::parser::comment;
 
     let ok_comments = [
         vec![
@@ -41,7 +40,7 @@ fn comment() {
 
     test_util::ok(
         |s| {
-            comment_parser
+            comment_parser()
                 .repeated()
                 .then_ignore(end())
                 .parse_recovery_verbose(*s)
@@ -70,7 +69,11 @@ fn comment() {
     ];
 
     test_util::err(
-        |s| comment_parser.then_ignore(end()).parse_recovery_verbose(*s),
+        |s| {
+            comment_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(*s)
+        },
         bad_comments.iter().flatten(),
     );
 }
@@ -82,9 +85,7 @@ pub fn bool() {
     let ok_bools = vec!["false", "true"];
     test_util::ok(
         |s| {
-            bool_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
+            bool_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
         },
         ok_bools.iter(),
     );
@@ -94,9 +95,7 @@ pub fn bool() {
     ];
     test_util::err(
         |s| {
-            bool_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
+            bool_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
         },
         bad_bools.iter(),
     );
@@ -104,13 +103,14 @@ pub fn bool() {
 
 #[test]
 pub fn int() {
-    // TODO: Separate parser for floats
-    let int_parser = crate::parser::number;
+    let int_parser = crate::parser::integer;
 
     let ok_ints = vec![
-        "0", "123i32", "123usize", "123u32", "0usize", // "-1", // ?
-        "1isize", "2usize",
-        "123_u32",
+        "0",
+        "123132123",
+        // "123i32", "123usize", "123u32", "0usize", // "-1", // ?
+        // "1isize", "2usize",
+        // "123_u32",
         // "0xff",
         // "0xff_u8",
         // "0o70",
@@ -122,15 +122,14 @@ pub fn int() {
     ];
     test_util::ok(
         |s| {
-            int_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
+            int_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
         },
         ok_ints.iter(),
     );
 
     let bad_ints = [
         // "0.1", // Should be a bad integer as soon as the parsers are separated
+        "-888555", // Negative number are a composition of Neg(Number(Integer(x)))
         "0,1",
         "0invalidSuffix",
         "123AFB43",
@@ -140,9 +139,7 @@ pub fn int() {
 
     test_util::err(
         |s| {
-            int_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
+            int_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
         },
         bad_ints.iter(),
     );
@@ -150,22 +147,22 @@ pub fn int() {
 
 #[test]
 pub fn float() {
-    // TODO: Separate parser for floats
-    let float_parser = crate::parser::number;
+    let float_parser = crate::parser::float;
 
     let ok_floats = vec![
-        "2.0", "2.", // "12E+99",
+        "2.0",
+        "2.",
+        // "12E+99",
         // "12.01E+99",
-        "123.0f64", "0.1f64", "0.1f32", "5f32",
+        // Type system
+        // "123.0f64", "0.1f64", "0.1f32", "5f32",
         // "12E+99_f64",
         // "12.01E+99_f64",
     ];
 
     test_util::ok(
         |s| {
-            float_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
+            float_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
         },
         ok_floats.iter(),
     );
@@ -176,9 +173,7 @@ pub fn float() {
 
     test_util::err(
         |s| {
-            float_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
+            float_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
         },
         bad_floats.iter(),
     );
@@ -224,6 +219,8 @@ pub fn identifiers() {
 }
 
 #[test]
+#[ignore]
+// Ignored 🌹
 pub fn raw_identifiers() {
     let identifier_parser = crate::parser::identifier;
 

@@ -19,24 +19,31 @@ pub fn identifier(
     text::ident().padded()
 }
 
-/// Any number. Ints, float, str, etc.
+/// Parses an integer number of radix 10
+/// TODO for radix != 10, preceded by 0b, 0t, 0x
+pub fn integer() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+    text::int(10)
+    .map(|s: String| ast::Expr::Num(ast::Number::Integer(s.parse().unwrap())))
+    .padded()
+}
+
+/// Parses a floating-point number
+/// TODO scientific notation
+pub fn float() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+    text::int::<_, Simple<char>>(10)
+    .then_ignore(just('.'))
+    .then(text::digits(10).or_not())
+    .map(|s: (String, Option<String>)| {
+        ast::Expr::Num(ast::Number::Float(
+            format!("{}.{}", s.0, s.1.unwrap_or("".to_string())).parse().unwrap(),
+        ))
+    })
+    .padded()
+}
+
+/// Any number. Ints or floats.
 pub fn number() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
-    // TODO for radix != 10, preceded by 0b, 0t, 0x
-    let integer = text::int(10)
-        .map(|s: String| ast::Expr::Num(ast::Number::Integer(s.parse().unwrap())))
-        .padded();
-
-    let float = text::int::<_, Simple<char>>(10)
-        .then_ignore(just('.'))
-        .then(text::digits(10))
-        .map(|s: (String, String)| {
-            ast::Expr::Num(ast::Number::Float(
-                format!("{}.{}", s.0, s.1).parse().unwrap(),
-            ))
-        })
-        .padded();
-
-    let number = float.or(integer);
+    let number = float().or(integer());
     number
 }
 
@@ -63,6 +70,8 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
 
     let identifier = identifier();
 
+    let string = string();
+
     let expr = recursive(|expr| {
         let number = number();
         let boolean = boolean();
@@ -77,6 +86,7 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
             .map(|(f, args)| ast::Expr::Call(f, args));
 
         let atom = number
+            .or(string)
             .or(boolean)
             .or(expr.delimited_by(just('('), just(')')))
             .or(call)

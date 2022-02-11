@@ -24,12 +24,16 @@ fn eval<'a>(
     funcs: &mut Vec<(&'a String, &'a [String], &'a Expr)>,
 ) -> Result<f64, String> {
     match expr {
+        //STUB - 
         Expr::Num(Number::Integer(x)) => Ok(*x as f64),
         Expr::Num(Number::Float(x)) => Ok(*x),
+        //STUB - 
         Expr::Bool(x) => Ok(match x {
             true => 1.0,
             false => 0.0,
         }),
+        //STUB - 
+        Expr::Str(_) => Ok(572146.),
         Expr::Neg(a) => Ok(-eval(a, vars, funcs)?),
         Expr::Add(a, b) => Ok(eval(a, vars, funcs)? + eval(b, vars, funcs)?),
         Expr::Sub(a, b) => Ok(eval(a, vars, funcs)? - eval(b, vars, funcs)?),
