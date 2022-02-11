@@ -47,9 +47,12 @@ pub fn boolean() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + 
         .map(|s| ast::Expr::Bool(s.parse().unwrap()))
 }
 
+/// Parses the string type. Does not support escaping.
 pub fn string() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone{
-    let string = text::char(40)
-    .map(|s| ast::Expr::String(s.parse().unwrap()))
+    just('"')
+        .ignore_then(take_until(just('"')))
+        // .collect::<String>()
+        .map(|_ | ast::Expr::Bool(true))
 }
 
 /// Parses the program for correct tokens and tokens order.

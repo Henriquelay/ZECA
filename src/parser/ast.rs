@@ -7,6 +7,8 @@ pub enum Expr {
     Num(Number),
     /// True or false
     Bool(bool),
+    /// String
+    // Str<'a>(&'a str),
 
     /// Negation expression. Both things like `-1` and `!true`
     Neg(Box<Expr>),
