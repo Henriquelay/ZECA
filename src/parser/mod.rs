@@ -27,13 +27,6 @@ pub fn integer() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + 
         .padded()
 }
 
-// /// Chupa
-// pub fn comparation() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
-//     expr()
-//         .then(just(">").or(just("<")).or(just("==")))
-//         .then(expr()).map(sua mãe)
-// }
-
 /// Parses a floating-point number
 /// TODO scientific notation
 pub fn float() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
@@ -71,6 +64,66 @@ pub fn string() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + C
         .map(|_| ast::Expr::Bool(true))
 }
 
+/// Parses expressions
+pub fn expr() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Clone {
+    let comment = comment();
+
+    let identifier = identifier();
+
+    let string = string();
+    recursive(|expr| {
+    let number = number();
+    let boolean = boolean();
+
+    let call = identifier
+        .then(
+            expr.clone()
+                .separated_by(just(','))
+                .allow_trailing() // Foo is Rust-like, so allow trailing commas to appear in arg lists
+                .delimited_by(just('('), just(')')),
+        )
+        .map(|(f, args)| ast::Expr::Call(f, args));
+
+    let atom = number
+        .or(string)
+        .or(boolean)
+        .or(expr.delimited_by(just('('), just(')')))
+        .or(call)
+        .or(identifier.map(ast::Expr::Var));
+
+    let op = |c| just(c).padded();
+
+    let unary = op('-')
+        .repeated()
+        .then(atom)
+        .foldr(|_op, rhs| ast::Expr::Neg(Box::new(rhs)));
+
+    let product = unary
+        .clone()
+        .then(
+            op('*')
+                .to(ast::Expr::Mul as fn(_, _) -> _)
+                .or(op('/').to(ast::Expr::Div as fn(_, _) -> _))
+                .then(unary)
+                .repeated(),
+        )
+        .foldl(|lhs, (op, rhs)| op(Box::new(lhs), Box::new(rhs)));
+
+    let sum = product
+        .clone()
+        .then(
+            op('+')
+                .to(ast::Expr::Add as fn(_, _) -> _)
+                .or(op('-').to(ast::Expr::Sub as fn(_, _) -> _))
+                .then(product)
+                .repeated(),
+        )
+        .foldl(|lhs, (op, rhs)| op(Box::new(lhs), Box::new(rhs)));
+
+    sum.padded()
+})
+}
+
 /// Parses the program for correct tokens and tokens order.
 /// Finished parsers are stored into variables and no call should be made to the variable itself, only chaining methods.
 /// Should NOT expect any kind of end-of-file ([`end()`][chumsky::prelude::end()]), as it will interfere with unitary tests and instead should be prepended when [`parser.parse()`][chumsky::Parser::parse()] is called, usually with `then_ignore(end())`.
@@ -79,59 +132,7 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
 
     let identifier = identifier();
 
-    let string = string();
-
-    let expr = recursive(|expr| {
-        let number = number();
-        let boolean = boolean();
-
-        let call = identifier
-            .then(
-                expr.clone()
-                    .separated_by(just(','))
-                    .allow_trailing() // Foo is Rust-like, so allow trailing commas to appear in arg lists
-                    .delimited_by(just('('), just(')')),
-            )
-            .map(|(f, args)| ast::Expr::Call(f, args));
-
-        let atom = number
-            .or(string)
-            .or(boolean)
-            .or(expr.delimited_by(just('('), just(')')))
-            .or(call)
-            .or(identifier.map(ast::Expr::Var));
-
-        let op = |c| just(c).padded();
-
-        let unary = op('-')
-            .repeated()
-            .then(atom)
-            .foldr(|_op, rhs| ast::Expr::Neg(Box::new(rhs)));
-
-        let product = unary
-            .clone()
-            .then(
-                op('*')
-                    .to(ast::Expr::Mul as fn(_, _) -> _)
-                    .or(op('/').to(ast::Expr::Div as fn(_, _) -> _))
-                    .then(unary)
-                    .repeated(),
-            )
-            .foldl(|lhs, (op, rhs)| op(Box::new(lhs), Box::new(rhs)));
-
-        let sum = product
-            .clone()
-            .then(
-                op('+')
-                    .to(ast::Expr::Add as fn(_, _) -> _)
-                    .or(op('-').to(ast::Expr::Sub as fn(_, _) -> _))
-                    .then(product)
-                    .repeated(),
-            )
-            .foldl(|lhs, (op, rhs)| op(Box::new(lhs), Box::new(rhs)));
-
-        sum.padded()
-    });
+    let expr = expr();
 
     let decl = recursive(|decl| {
         let r#let = text::keyword("let")
