@@ -5,293 +5,226 @@ mod test_util;
 
 #[test]
 fn comment() {
-    let comment_parser = crate::parser::comment;
-
-    let ok_comments = [
-        vec![
-            "// this is a comment\n",
-            "//\n",
-            "// \n",
-            "///\n",
-            "// this is a comment // this still is\n",
-            "// this is a comment\n// two in a row!\n",
-        ],
-        vec![
-            "/* */",
-            "/* a block comment */",
-            "/* anoter block comment */",
-            "/** a double block comment **/",
-            "/* should still be valid **/",
-            "/*so should this*/",
-            "/**/",
-            "/* this is
-            multi line */",
-            "/* /* */",
-            "/** this is
-            // multi line double **/",
-            //TODO     "/* nested block comments
-            //     /*
-            //         Should be fine
-            //      */
-            // */",
-        ],
-        vec!["// both types of comments,\n/*but only one str*/"],
-    ];
-
-    test_util::ok(
+    test_util::tests(
         |s| {
-            comment_parser()
+            crate::parser::comment_parser()
                 .repeated()
                 .then_ignore(end())
-                .parse_recovery_verbose(*s)
+                .parse_recovery_verbose(s)
         },
-        ok_comments.iter().flatten(),
-    );
-
-    let bad_comments = [
         vec![
-            "not a comment",
-            "something before // comment ",
-            "/incomplete",
-            "/incomplete/",
-            // "", // Didn't handle empty comment very well
-            " ",
-        ],
+            vec![
+                "// this is a comment\n",
+                "//\n",
+                "// \n",
+                "///\n",
+                "// this is a comment // this still is\n",
+                "// this is a comment\n// two in a row!\n",
+            ],
+            vec![
+                "/* */",
+                "/* a block comment */",
+                "/* anoter block comment */",
+                "/** a double block comment **/",
+                "/* should still be valid **/",
+                "/*so should this*/",
+                "/**/",
+                "/* this is
+            multi line */",
+                "/* /* */",
+                "/** this is
+            // multi line double **/",
+                //TODO     "/* nested block comments
+                //     /*
+                //         Should be fine
+                //      */
+                // */",
+            ],
+            vec!["// both types of comments,\n/*but only one str*/"],
+        ]
+        .into_iter()
+        .flatten(),
         vec![
-            "/*/",
-            "/* /",
-            "/ */",
-            "/*",
-            "*/",
-            "something before /* comment */",
-            "/* comment */ something after",
-        ],
-    ];
-
-    test_util::err(
-        |s| {
-            comment_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s)
-        },
-        bad_comments.iter().flatten(),
+            vec![
+                "not a comment",
+                "something before // comment ",
+                "/incomplete",
+                "/incomplete/",
+                // "", // Didn't handle empty comment very well
+                " ",
+            ],
+            vec![
+                "/*/",
+                "/* /",
+                "/ */",
+                "/*",
+                "*/",
+                "something before /* comment */",
+                "/* comment */ something after",
+            ],
+        ]
+        .into_iter()
+        .flatten(),
     );
 }
 
 #[test]
 pub fn bool() {
-    let bool_parser = crate::parser::boolean;
-
-    let ok_bools = vec!["false", "true"];
-    test_util::ok(
+    test_util::tests(
         |s| {
-            bool_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
+            crate::parser::boolean_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
         },
-        ok_bools.iter(),
-    );
-
-    let bad_bools = [
-        "flase", "treu", " ", "t", "r", "u", "e", "f", "a", "l", "s", "e",
-    ];
-    test_util::err(
-        |s| {
-            bool_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
-        },
-        bad_bools.iter(),
+        vec!["false", "true"],
+        vec![
+            "flase", "treu", " ", "t", "r", "u", "e", "f", "a", "l", "s", "e",
+        ],
     );
 }
 
 #[test]
 pub fn int() {
-    let int_parser = crate::parser::integer;
-
-    let ok_ints = vec![
-        "0",
-        "123132123",
-        // "123i32", "123usize", "123u32", "0usize", // "-1", // ?
-        // "1isize", "2usize",
-        // "123_u32",
-        // "0xff",
-        // "0xff_u8",
-        // "0o70",
-        // "0o70_i16",
-        // "0b1111_1111_1001_0000",
-        // "0b1111_1111_1001_0000i64",
-        // "0b________1",
-        // "0usize",
-    ];
-    test_util::ok(
+    test_util::tests(
         |s| {
-            int_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
+            crate::parser::integer_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
         },
-        ok_ints.iter(),
-    );
-
-    let bad_ints = [
-        // "0.1", // Should be a bad integer as soon as the parsers are separated
-        "-888555", // Negative number are a composition of Neg(Number(Integer(x)))
-        "0,1",
-        "0invalidSuffix",
-        "123AFB43",
-        "0b_",
-        "0b____",
-    ];
-
-    test_util::err(
-        |s| {
-            int_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
-        },
-        bad_ints.iter(),
+        vec![
+            "0",
+            "123132123",
+            // "123i32", "123usize", "123u32", "0usize", // "-1", // ?
+            // "1isize", "2usize",
+            // "123_u32",
+            // "0xff",
+            // "0xff_u8",
+            // "0o70",
+            // "0o70_i16",
+            // "0b1111_1111_1001_0000",
+            // "0b1111_1111_1001_0000i64",
+            // "0b________1",
+            // "0usize",
+        ],
+        vec![
+            // "0.1", // Should be a bad integer as soon as the parsers are separated
+            "-888555", // Negative number are a composition of Neg(Number(Integer(x)))
+            "0,1",
+            "0invalidSuffix",
+            "123AFB43",
+            "0b_",
+            "0b____",
+        ],
     );
 }
 
 #[test]
 pub fn float() {
-    let float_parser = crate::parser::float;
-
-    let ok_floats = vec![
-        "2.0",
-        "2.",
-        // "12E+99",
-        // "12.01E+99",
-        // Type system
-        // "123.0f64", "0.1f64", "0.1f32", "5f32",
-        // "12E+99_f64",
-        // "12.01E+99_f64",
-    ];
-
-    test_util::ok(
+    test_util::tests(
         |s| {
-            float_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
+            crate::parser::float_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
         },
-        ok_floats.iter(),
-    );
-
-    let bad_floats = vec![
-        "2", "2f16", "2f8", "2.f64", // "2.E+99"
-    ];
-
-    test_util::err(
-        |s| {
-            float_parser().then_ignore(end()).parse_recovery_verbose(*s) // ???
-        },
-        bad_floats.iter(),
+        vec![
+            "2.0",
+            "2.",
+            // TODO
+            // "12E+99",
+            // "12.01E+99",
+            // "123.0f64", "0.1f64", "0.1f32", "5f32",
+            // "12E+99_f64",
+            // "12.01E+99_f64",
+        ],
+        vec![
+            "2", "2f16", "2f8", "2.f64", // "2.E+99"
+        ],
     );
 }
 
 #[test]
 pub fn identifiers() {
-    let identifier_parser = crate::parser::identifier;
-    let ok_identifiers = [
-        "x",
-        "variable",
-        "data",
-        "TEST",
-        "foo",
-        "_identifier",
-        "_",
-        // FIXME update to unicode XID
-        // "Москва",
-        // "東京",
-        // "💯",
-        // "r#true",
-    ];
-
-    test_util::ok(
+    test_util::tests(
         |s| {
-            identifier_parser()
+            crate::parser::identifier_parser()
                 .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
+                .parse_recovery_verbose(s)
         },
-        ok_identifiers.iter(),
-    );
-
-    let bad_identifiers = ["", " "];
-
-    test_util::err(
-        |s| {
-            identifier_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
-        },
-        bad_identifiers.iter(),
+        vec![
+            "x",
+            "variable",
+            "data",
+            "TEST",
+            "foo",
+            "_identifier",
+            "_",
+            // FIXME update to unicode XID
+            // "Москва",
+            // "東京",
+            // "💯",
+            // "r#true",
+        ],
+        vec!["", " "],
     );
 }
 
 #[test]
-#[ignore]
-// Ignored 🌹
+#[ignore] // 🌹
 pub fn raw_identifiers() {
-    let identifier_parser = crate::parser::identifier;
-
-    let ok_identifiers = [
-        "r#x#",
-        "r#variable#",
-        "r#data#",
-        "r#TEST#",
-        "r#foo#",
-        "r#_identifier#",
-        "r#_#",
-        // FIXME update to unicode XID
-        // "Москва",
-        // "東京",
-        // "💯",
-        // "r#true",
-    ];
-
-    test_util::ok(
+    test_util::tests(
         |s| {
-            identifier_parser()
+            crate::parser::identifier_parser()
                 .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
+                .parse_recovery_verbose(s)
         },
-        ok_identifiers.iter(),
-    );
-
-    let bad_identifiers = ["r##", "r# #"];
-
-    test_util::err(
-        |s| {
-            identifier_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(*s) // ???
-        },
-        bad_identifiers.iter(),
+        vec![
+            "r#x#",
+            "r#variable#",
+            "r#data#",
+            "r#TEST#",
+            "r#foo#",
+            "r#_identifier#",
+            "r#_#",
+            // FIXME update to unicode XID
+            // "Москва",
+            // "東京",
+            // "💯",
+            // "r#true",
+        ],
+        vec!["r##", "r# #"],
     );
 }
 
 #[test]
-// Ignored 🌹
 pub fn string() {
-    let string_parser = crate::parser::string;
-
-    let ok_identifiers = [r#""""#, r#""\""#, r#""uma string feliz :)""#];
-
-    test_util::ok(
+    test_util::tests(
         |s| {
-            string_parser()
+            crate::parser::string_parser()
                 .then_ignore(end())
-                .parse_recovery_verbose(*s)
+                .parse_recovery_verbose(s)
         },
-        ok_identifiers.iter(),
+        vec![r#""""#, r#""\""#, r#""uma string feliz :)""#],
+        vec![
+            r#"string triste :("#,
+            r#"""#,
+            r#""string sem fechar"#,
+            r#"''"#,
+            r#"'test'"#,
+        ],
     );
+}
 
-    let bad_identifiers = [
-        r#"string triste :("#,
-        r#"""#,
-        r#""string sem fechar"#,
-        r#"''"#,
-        r#"'test'"#,
-    ];
-
-    test_util::err(
+#[test]
+pub fn expr() {
+    test_util::tests(
         |s| {
-            string_parser()
+            crate::parser::expr_parser()
                 .then_ignore(end())
-                .parse_recovery_verbose(*s)
+                .parse_recovery(s)
         },
-        bad_identifiers.iter(),
-    );
+        vec!["1 + 1"],
+        vec!["1+"],
+    )
 }
 
 /*

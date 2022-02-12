@@ -2,12 +2,12 @@ use std::fmt::Debug;
 
 use chumsky::prelude::Simple;
 
-pub fn ok<F, T, O>(parser: F, iterable: T)
+pub fn ok<P, T, O>(parser: P, iterable: T)
 where
     O: Debug,
     T: IntoIterator,
     T::Item: AsRef<str> + Debug,
-    F: Fn(T::Item) -> (Option<O>,Vec<Simple<char>>),
+    P: Fn(T::Item) -> (Option<O>, Vec<Simple<char>>),
 {
     for t in iterable {
         println!(">Testing ok: {:?}", t);
@@ -17,12 +17,12 @@ where
     }
 }
 
-pub fn err<F, T, O>(parser: F, iterable: T)
+pub fn err<P, T, O>(parser: P, iterable: T)
 where
     O: Debug,
     T: IntoIterator,
     T::Item: AsRef<str> + Debug,
-    F: Fn(T::Item) -> (Option<O>,Vec<Simple<char>>),
+    P: Fn(T::Item) -> (Option<O>, Vec<Simple<char>>),
 {
     for t in iterable {
         println!(">Testing err: {:?}", t);
@@ -30,4 +30,16 @@ where
         println!("Parse result: {:?}", parsed);
         assert!(parsed.0.is_none());
     }
+}
+
+pub fn tests<P, T, O>(parser: P, ok_entry: T, bad_entry: T)
+where
+    O: Debug,
+    T: IntoIterator,
+    T::Item: AsRef<str> + Debug,
+    P: Fn(T::Item) -> (Option<O>, Vec<Simple<char>>) + Clone,
+{
+    ok(parser.clone(), ok_entry);
+
+    err(parser.clone(), bad_entry);
 }
