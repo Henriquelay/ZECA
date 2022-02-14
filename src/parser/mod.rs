@@ -6,11 +6,14 @@ pub mod ast;
 use ast::*;
 
 /// Parses a single inline or block comment
-pub fn comment_parser() -> impl Parser<char, (), Error = Simple<char>> + Copy + Clone {
+pub fn comment_parser() -> impl Parser<char, (), Error = Simple<char>> + Clone + Copy {
     let inline_comment = just("//")
         .ignore_then(take_until(text::newline()))
         .ignored();
     let single_block_comment = just("/*").ignore_then(take_until(just("*/"))).ignored();
+    // let nested_block_comment = recursive(|nested_comment| {
+    //     single_block_comment.or(single_block_comment.delimited_by(nested_comment.clone(), nested_comment))
+    // }).ignored();
     single_block_comment.or(inline_comment)
 }
 

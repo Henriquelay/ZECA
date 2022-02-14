@@ -65,7 +65,6 @@ fn eval<'a>(
             let right = eval(b, vars, funcs)?;
             for_every_number_Value!((left, right), |x, y| x == y)
         })),
-        //STUB -
         Expr::Neg(a) => match eval(a, vars, funcs)? {
             Value::Num(x) => Ok(Value::Num(-x)),
             Value::Bool(x) => Ok(Value::Bool(!x)),

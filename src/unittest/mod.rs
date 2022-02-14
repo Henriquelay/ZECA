@@ -34,10 +34,11 @@ fn comment() {
                 "/* /* */",
                 "/** this is
             // multi line double **/",
-                //TODO     "/* nested block comments
+                // "/* nested block comments
                 //     /*
                 //         Should be fine
                 //      */
+                //     even with something after
                 // */",
             ],
             vec!["// both types of comments,\n/*but only one str*/"],
@@ -129,7 +130,7 @@ pub fn float() {
         vec![
             "2.0",
             "2.",
-            // TODO
+            // TODO scientific notation
             // "12E+99",
             // "12.01E+99",
             // "123.0f64", "0.1f64", "0.1f32", "5f32",
@@ -185,7 +186,6 @@ pub fn raw_identifiers() {
             "r#foo#",
             "r#_identifier#",
             "r#_#",
-            // FIXME update to unicode XID
             // "Москва",
             // "東京",
             // "💯",
