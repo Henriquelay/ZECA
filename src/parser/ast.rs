@@ -1,20 +1,27 @@
 //! The AST for the parser to use
 
+/// Return values for ZECA
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+pub enum Value {
+    /// Numbers
+    Num(Number),
+    /// Boolean value
+    Bool(bool),
+    // TODO
+    // Str(String),
+    // TODO para fazer cidadãs de primeira classe
+    // Fn
+}
+
 /// Types for ZECA's expressions. Uses mostly native Rust types
 #[derive(Debug)]
 pub enum Expr {
-    /// Numbers. Both integers and float
-    Num(Number),
-    /// True or false
-    Bool(bool),
-    /// String
-    Str(String),
-
-    /// Comparation between 2 expr
-    Cmp(Comparation),
+    /// Literals
+    Val(Value),
 
     /// Negation expression. Both things like `-1` and `!true`
     Neg(Box<Expr>),
+
     /// Binary +
     Add(Box<Expr>, Box<Expr>),
     /// Binary -
@@ -24,19 +31,15 @@ pub enum Expr {
     /// Binary /
     Div(Box<Expr>, Box<Expr>),
 
-    /// Variable "calls"
-    Var(String),
+    /// Expr1 < Expr2
+    Less(Box<Expr>, Box<Expr>),
+    /// Expr1 > Expr2
+    Greater(Box<Expr>, Box<Expr>),
+    /// Expr1 == Expr2
+    Equal(Box<Expr>, Box<Expr>),
+
     /// Function call expression. `()` operator placed after a symbol, as in `foo()`.
     Call(String, Vec<Expr>),
-    /// Variables declarations
-    Let {
-        /// Name defined to this symbol.
-        name: String,
-        /// Value to be assigned to symbol.
-        rhs: Box<Expr>,
-        /// Evaluated after symbol's own evaluation.
-        then: Box<Expr>,
-    },
     /// Function declaration
     Fn {
         /// Name defined to this symbol.
@@ -48,24 +51,39 @@ pub enum Expr {
         /// `Evaluated after symbol's own evaluation.
         then: Box<Expr>,
     },
+
+    /// Variable "calls"
+    Var(String),
+    /// Variables declarations
+    Let {
+        /// Name defined to this symbol.
+        name: String,
+        /// Value to be assigned to symbol.
+        rhs: Box<Expr>,
+        /// Evaluated after symbol's own evaluation.
+        then: Box<Expr>,
+    },
 }
 
 /// Types for ZECA's expressions. Uses mostly native Rust types
-#[derive(Debug)]
+#[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
 pub enum Number {
     /// Integer numbers. -1, 0, 1
     Integer(isize),
+    /// Unsigned integer numbers. 0, 1, 2
+    UInteger(usize),
     /// Real numbers
     Float(f64),
 }
 
-/// Is this bigger than that?
-#[derive(Debug)]
-pub enum Comparation {
-    /// 2 > 1
-    GreaterThan(Box<Expr>, Box<Expr>),
-    /// 1 < 2
-    LesserThan(Box<Expr>, Box<Expr>),
-    /// 1 == 0 😳
-    Equals(Box<Expr>, Box<Expr>),
+impl std::ops::Neg for Number {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        match self {
+            Self::Integer(x) => Self::Integer(-x),
+            Self::UInteger(x) => Self::Integer(-(x as isize)),
+            Self::Float(x) => Self::Float(-x),
+        }
+    }
 }

@@ -3,6 +3,7 @@
 use chumsky::{prelude::*, text::Character};
 
 pub mod ast;
+use ast::*;
 
 /// Parses a single inline or block comment
 pub fn comment_parser() -> impl Parser<char, (), Error = Simple<char>> + Copy + Clone {
@@ -21,51 +22,51 @@ pub fn identifier_parser(
 
 /// Parses an integer number of radix 10
 /// TODO for radix != 10, preceded by 0b, 0t, 0x
-pub fn integer_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+pub fn integer_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     text::int(10)
-        .map(|s: String| ast::Expr::Num(ast::Number::Integer(s.parse().unwrap())))
+        .map(|s: String| Expr::Val(Value::Num(Number::Integer(s.parse().unwrap()))))
         .padded()
 }
 
 /// Parses a floating-point number
 /// TODO scientific notation
-pub fn float_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+pub fn float_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     text::int::<_, Simple<char>>(10)
         .then_ignore(just('.'))
         .then(text::digits(10).or_not())
         .map(|s: (String, Option<String>)| {
-            ast::Expr::Num(ast::Number::Float(
+            Expr::Val(Value::Num(Number::Float(
                 format!("{}.{}", s.0, s.1.unwrap_or("".to_string()))
                     .parse()
                     .unwrap(),
-            ))
+            )))
         })
         .padded()
 }
 
 /// Any number. Ints or floats.
-pub fn number_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+pub fn number_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     let number = float_parser().or(integer_parser());
     number
 }
 
 /// True of false. Rejects on anything else
-pub fn boolean_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+pub fn boolean_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     just("true")
         .or(just("false"))
-        .map(|s| ast::Expr::Bool(s.parse().unwrap()))
+        .map(|s| Expr::Val(Value::Bool(s.parse().unwrap())))
 }
 
 /// Parses the string type. Does not support escaping.
-pub fn string_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Copy + Clone {
+pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     just('"')
         .ignore_then(take_until(just('"')))
         // .collect::<String>()
-        .map(|_| ast::Expr::Bool(true))
+        .map(|_| Expr::Val(Value::Bool(true)))
 }
 
 /// Parses expressions, made of `atom`s
-pub fn expr_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Clone {
+pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
     let identifier = identifier_parser();
 
     let string = string_parser();
@@ -79,28 +80,28 @@ pub fn expr_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Clo
                     .allow_trailing() // Foo is Rust-like, so allow trailing commas to appear in arg lists
                     .delimited_by(just('('), just(')')),
             )
-            .map(|(f, args)| ast::Expr::Call(f, args));
+            .map(|(f, args)| Expr::Call(f, args));
 
         let atom = number
             .or(string)
             .or(boolean)
             .or(expr.delimited_by(just('('), just(')')))
             .or(call)
-            .or(identifier.map(ast::Expr::Var));
+            .or(identifier.map(Expr::Var));
 
         let op = |c| just(c).padded();
 
         let unary = op("-")
             .repeated()
             .then(atom)
-            .foldr(|_op, rhs| ast::Expr::Neg(Box::new(rhs)));
+            .foldr(|_op, rhs| Expr::Neg(Box::new(rhs)));
 
         let product = unary
             .clone()
             .then(
                 op("*")
-                    .to(ast::Expr::Mul as fn(_, _) -> _)
-                    .or(op("/").to(ast::Expr::Div as fn(_, _) -> _))
+                    .to(Expr::Mul as fn(_, _) -> _)
+                    .or(op("/").to(Expr::Div as fn(_, _) -> _))
                     .then(unary)
                     .repeated(),
             )
@@ -110,8 +111,8 @@ pub fn expr_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Clo
             .clone()
             .then(
                 op("+")
-                    .to(ast::Expr::Add as fn(_, _) -> _)
-                    .or(op("-").to(ast::Expr::Sub as fn(_, _) -> _))
+                    .to(Expr::Add as fn(_, _) -> _)
+                    .or(op("-").to(Expr::Sub as fn(_, _) -> _))
                     .then(product)
                     .repeated(),
             )
@@ -120,13 +121,14 @@ pub fn expr_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Clo
         let comparation = sum
             .clone()
             .then(
-                op("==").to(ast::Comparation::Equals as fn(_,_) -> _)
-                    .or(op("<").to(ast::Comparation::Equals as fn(_,_) -> _))
-                    .or(op(">").to(ast::Comparation::Equals as fn(_,_) -> _))
+                op("==")
+                    .to(Expr::Equal as fn(_, _) -> _)
+                    .or(op("<").to(Expr::Less as fn(_, _) -> _))
+                    .or(op(">").to(Expr::Greater as fn(_, _) -> _))
                     .then(sum)
                     .repeated(),
             )
-            .foldl(|lhs, (op, rhs)| ast::Expr::Cmp(op(Box::new(lhs), Box::new(rhs))));
+            .foldl(|lhs, (op, rhs)| op(Box::new(lhs), Box::new(rhs)));
 
         comparation.padded()
     })
@@ -135,7 +137,7 @@ pub fn expr_parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> + Clo
 /// Parses the program for correct tokens and tokens order.
 /// Finished parsers are stored into variables and no call should be made to the variable itself, only chaining methods.
 /// Should NOT expect any kind of end-of-file ([`end()`][chumsky::prelude::end()]), as it will interfere with unitary tests and instead should be prepended when [`parser.parse()`][chumsky::Parser::parse()] is called, usually with `then_ignore(end())`.
-pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
+pub fn parser() -> impl Parser<char, Expr, Error = Simple<char>> {
     let comment = comment_parser();
 
     let identifier = identifier_parser();
@@ -149,7 +151,7 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
             .then(expr.clone())
             .then_ignore(just(';'))
             .then(decl.clone())
-            .map(|((name, rhs), then)| ast::Expr::Let {
+            .map(|((name, rhs), then)| Expr::Let {
                 name,
                 rhs: Box::new(rhs),
                 then: Box::new(then),
@@ -162,7 +164,7 @@ pub fn parser() -> impl Parser<char, ast::Expr, Error = Simple<char>> {
             .then(expr.clone())
             .then_ignore(just(';'))
             .then(decl)
-            .map(|(((name, args), body), then)| ast::Expr::Fn {
+            .map(|(((name, args), body), then)| Expr::Fn {
                 name,
                 args,
                 body: Box::new(body),

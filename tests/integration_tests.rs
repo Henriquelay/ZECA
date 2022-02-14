@@ -1,4 +1,6 @@
-fn assert_file<P>(path: P) -> f64
+use zeca::parser::ast::{Number, Value};
+
+fn parse_file<P>(path: P) -> Value
 where
     P: AsRef<std::path::Path>,
 {
@@ -13,7 +15,11 @@ where
 fn simple() {
     let expected_value = 13.06;
     let delta = 1e-10;
-    let val = assert_file("tests/examples/good/simple.zeca");
+    let val = parse_file("tests/examples/good/simple.zeca");
+    let val = match val {
+        Value::Num(Number::Float(x)) => x,
+        _ => panic!(),
+    };
     assert!(f64::abs(val - expected_value) < delta);
 }
 
@@ -21,6 +27,10 @@ fn simple() {
 fn negation() {
     let expected_value = -3.;
     let delta = 1e-10;
-    let val = assert_file("tests/examples/good/neg.zeca");
+    let val = parse_file("tests/examples/good/neg.zeca");
+    let val = match val {
+        Value::Num(Number::Float(x)) => x,
+        _ => panic!(),
+    };
     assert!(f64::abs(val - expected_value) < delta);
 }

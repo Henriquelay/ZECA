@@ -12,64 +12,111 @@ mod unittest;
 
 pub mod parser;
 use chumsky::{prelude::end, Parser};
-use parser::{ast::{Comparation, Expr, Number}, parser};
+use parser::{ast::*, parser};
+
+macro_rules! for_every_number_Value {
+    ($expr:expr, $clj:expr) => {
+        match $expr {
+            (Value::Num(n), Value::Num(o)) => match (n, o) {
+                (Number::Integer(x), Number::Integer(y)) => $clj(x, y),
+                (Number::UInteger(x), Number::UInteger(y)) => $clj(x, y),
+                (Number::Float(x), Number::Float(y)) => $clj(x, y),
+                _ => unimplemented!(),
+            },
+            _ => unimplemented!(),
+        }
+    };
+}
+
+macro_rules! for_every_number_Value_wrapped {
+    ($expr:expr, $clj:expr) => {
+        match $expr {
+            (Value::Num(n), Value::Num(o)) => match (n, o) {
+                (Number::Integer(x), Number::Integer(y)) => Number::Integer($clj(x, y)),
+                (Number::UInteger(x), Number::UInteger(y)) => Number::UInteger($clj(x, y)),
+                (Number::Float(x), Number::Float(y)) => Number::Float($clj(x, y)),
+                _ => unimplemented!(),
+            },
+            _ => unimplemented!(),
+        }
+    };
+}
 
 /// Evaluates `Expr`'s  return value.
 fn eval<'a>(
     expr: &'a Expr,
-    vars: &mut Vec<(&'a String, f64)>,
+    vars: &mut Vec<(String, Value)>,
     funcs: &mut Vec<(&'a String, &'a [String], &'a Expr)>,
-) -> Result<f64, String> {
+) -> Result<Value, String> {
     match expr {
-        //STUB - 
-        Expr::Num(Number::Integer(x)) => Ok(*x as f64),
-        Expr::Num(Number::Float(x)) => Ok(*x),
-        //STUB - 
-        Expr::Bool(x) => Ok(match x {
-            true => 1.0,
-            false => 0.0,
-        }),
-        // STUB -
-        Expr::Cmp(Comparation::LesserThan(a, b)) => Ok(
-            (eval(a, vars, funcs).unwrap() < eval(b, vars, funcs).unwrap()) as usize as f64
-        ),
-        Expr::Cmp(Comparation::GreaterThan(a, b)) => Ok(
-            (eval(a, vars, funcs).unwrap() > eval(b, vars, funcs).unwrap()) as usize as f64
-        ),
-        Expr::Cmp(Comparation::Equals(a, b)) => Ok(
-            (eval(a, vars, funcs).unwrap() == eval(b, vars, funcs).unwrap()) as usize as f64
-        ),
-        //STUB - 
-        Expr::Str(_) => Ok(572146.),
-        Expr::Neg(a) => Ok(-eval(a, vars, funcs)?),
-        Expr::Add(a, b) => Ok(eval(a, vars, funcs)? + eval(b, vars, funcs)?),
-        Expr::Sub(a, b) => Ok(eval(a, vars, funcs)? - eval(b, vars, funcs)?),
-        Expr::Mul(a, b) => Ok(eval(a, vars, funcs)? * eval(b, vars, funcs)?),
-        Expr::Div(a, b) => Ok(eval(a, vars, funcs)? / eval(b, vars, funcs)?),
+        Expr::Val(x) => Ok(*x),
+        Expr::Less(a, b) => Ok(Value::Bool({
+            let left = eval(a, vars, funcs)?;
+            let right = eval(b, vars, funcs)?;
+            for_every_number_Value!((left, right), |x, y| x < y)
+        })),
+        Expr::Greater(a, b) => Ok(Value::Bool({
+            let left = eval(a, vars, funcs)?;
+            let right = eval(b, vars, funcs)?;
+            for_every_number_Value!((left, right), |x, y| x > y)
+        })),
+        Expr::Equal(a, b) => Ok(Value::Bool({
+            let left = eval(a, vars, funcs)?;
+            let right = eval(b, vars, funcs)?;
+            for_every_number_Value!((left, right), |x, y| x == y)
+        })),
+        //STUB -
+        Expr::Neg(a) => match eval(a, vars, funcs)? {
+            Value::Num(x) => Ok(Value::Num(-x)),
+            Value::Bool(x) => Ok(Value::Bool(!x)),
+        },
+        Expr::Add(a, b) => Ok(Value::Num({
+            let left = eval(a, vars, funcs)?;
+            let right = eval(b, vars, funcs)?;
+            for_every_number_Value_wrapped!((left, right), |x, y| x + y)
+        })),
+        Expr::Sub(a, b) => Ok(Value::Num({
+            let left = eval(a, vars, funcs)?;
+            let right = eval(b, vars, funcs)?;
+            for_every_number_Value_wrapped!((left, right), |x, y| x - y)
+        })),
+        Expr::Mul(a, b) => Ok(Value::Num({
+            let left = eval(a, vars, funcs)?;
+            let right = eval(b, vars, funcs)?;
+            for_every_number_Value_wrapped!((left, right), |x, y| x * y)
+        })),
+        Expr::Div(a, b) => Ok(Value::Num({
+            let left = eval(a, vars, funcs)?;
+            let right = eval(b, vars, funcs)?;
+            for_every_number_Value_wrapped!((left, right), |x, y| x / y)
+        })),
         Expr::Var(name) => {
-            if let Some((_, val)) = vars.iter().rev().find(|(var, _)| *var == name) {
-                Ok(*val)
+            if let Some((_, value)) = vars.iter().rev().find(|(var, _)| var == name) {
+                Ok(*value)
             } else {
                 Err(format!("Cannot find variable `{}` in scope", name))
             }
         }
         Expr::Let { name, rhs, then } => {
             let rhs = eval(rhs, vars, funcs)?;
-            vars.push((name, rhs));
+            vars.push((name.clone(), rhs));
             let output = eval(then, vars, funcs);
             vars.pop();
             output
         }
         Expr::Call(name, args) => {
-            if let Some((_, arg_names, body)) =
-                funcs.iter().rev().find(|(var, _, _)| *var == name).copied()
+            if let Some((_, arg_names, body)) = funcs
+                .iter()
+                .rev()
+                .find(|(var, _, _)| var == &name)
+                .copied()
             {
                 if arg_names.len() == args.len() {
                     let mut args = args
                         .iter()
                         .map(|arg| eval(arg, vars, funcs))
                         .zip(arg_names.iter())
-                        .map(|(val, name)| Ok((name, val?)))
+                        .map(|(val, name)| Ok((name.clone(), val?)))
                         .collect::<Result<_, String>>()?;
                     vars.append(&mut args);
                     let output = eval(body, vars, funcs);
@@ -93,7 +140,7 @@ fn eval<'a>(
             body,
             then,
         } => {
-            funcs.push((name, args, body));
+            funcs.push((&name, &args, &body));
             let output = eval(then, vars, funcs);
             funcs.pop();
             output
@@ -102,7 +149,7 @@ fn eval<'a>(
 }
 
 /// Evaluates souce string using [`parser()`]
-pub fn eval_source(src: String) -> Result<f64, Vec<String>> {
+pub fn eval_source(src: String) -> Result<Value, Vec<String>> {
     match parser().then_ignore(end()).parse_recovery_verbose(src) {
         (Some(ast), _) => match eval(&ast, &mut Vec::new(), &mut Vec::new()) {
             Ok(output) => Ok(output),

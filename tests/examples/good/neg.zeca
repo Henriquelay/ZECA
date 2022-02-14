@@ -1,6 +1,6 @@
 let x = - 5.03;
 // some comments
-let y = -3 - x;
+let y = -3.0 - x;
 /* some more
 comments */
 let t = true;
