@@ -17,7 +17,7 @@ use parser::{ast::*, parser};
 macro_rules! for_every_number_Value {
     ($expr:expr, $clj:expr) => {
         match $expr {
-            (Value::Num(n), Value::Num(o)) => match (n, o) {
+            (Literal::Num(n), Literal::Num(o)) => match (n, o) {
                 (Number::Integer(x), Number::Integer(y)) => $clj(x, y),
                 (Number::UInteger(x), Number::UInteger(y)) => $clj(x, y),
                 (Number::Float(x), Number::Float(y)) => $clj(x, y),
@@ -31,7 +31,7 @@ macro_rules! for_every_number_Value {
 macro_rules! for_every_number_Value_wrapped {
     ($expr:expr, $clj:expr) => {
         match $expr {
-            (Value::Num(n), Value::Num(o)) => match (n, o) {
+            (Literal::Num(n), Literal::Num(o)) => match (n, o) {
                 (Number::Integer(x), Number::Integer(y)) => Number::Integer($clj(x, y)),
                 (Number::UInteger(x), Number::UInteger(y)) => Number::UInteger($clj(x, y)),
                 (Number::Float(x), Number::Float(y)) => Number::Float($clj(x, y)),
@@ -45,46 +45,46 @@ macro_rules! for_every_number_Value_wrapped {
 /// Evaluates `Expr`'s  return value.
 fn eval<'a>(
     expr: &'a Expr,
-    vars: &mut Vec<(String, Value)>,
+    vars: &mut Vec<(String, Literal)>,
     funcs: &mut Vec<(&'a String, &'a [String], &'a Expr)>,
-) -> Result<Value, String> {
+) -> Result<Literal, String> {
     match expr {
-        Expr::Val(x) => Ok(*x),
-        Expr::Less(a, b) => Ok(Value::Bool({
+        Expr::Lit(x) => Ok(*x),
+        Expr::Lt(a, b) => Ok(Literal::Bool({
             let left = eval(a, vars, funcs)?;
             let right = eval(b, vars, funcs)?;
             for_every_number_Value!((left, right), |x, y| x < y)
         })),
-        Expr::Greater(a, b) => Ok(Value::Bool({
+        Expr::Gt(a, b) => Ok(Literal::Bool({
             let left = eval(a, vars, funcs)?;
             let right = eval(b, vars, funcs)?;
             for_every_number_Value!((left, right), |x, y| x > y)
         })),
-        Expr::Equal(a, b) => Ok(Value::Bool({
+        Expr::Eq(a, b) => Ok(Literal::Bool({
             let left = eval(a, vars, funcs)?;
             let right = eval(b, vars, funcs)?;
             for_every_number_Value!((left, right), |x, y| x == y)
         })),
         Expr::Neg(a) => match eval(a, vars, funcs)? {
-            Value::Num(x) => Ok(Value::Num(-x)),
-            Value::Bool(x) => Ok(Value::Bool(!x)),
+            Literal::Num(x) => Ok(Literal::Num(-x)),
+            Literal::Bool(x) => Ok(Literal::Bool(!x)),
         },
-        Expr::Add(a, b) => Ok(Value::Num({
+        Expr::Add(a, b) => Ok(Literal::Num({
             let left = eval(a, vars, funcs)?;
             let right = eval(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x + y)
         })),
-        Expr::Sub(a, b) => Ok(Value::Num({
+        Expr::Sub(a, b) => Ok(Literal::Num({
             let left = eval(a, vars, funcs)?;
             let right = eval(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x - y)
         })),
-        Expr::Mul(a, b) => Ok(Value::Num({
+        Expr::Mul(a, b) => Ok(Literal::Num({
             let left = eval(a, vars, funcs)?;
             let right = eval(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x * y)
         })),
-        Expr::Div(a, b) => Ok(Value::Num({
+        Expr::Div(a, b) => Ok(Literal::Num({
             let left = eval(a, vars, funcs)?;
             let right = eval(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x / y)
@@ -148,7 +148,7 @@ fn eval<'a>(
 }
 
 /// Evaluates souce string using [`parser()`]
-pub fn eval_source(src: String) -> Result<Value, Vec<String>> {
+pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
     match parser().then_ignore(end()).parse_recovery_verbose(src) {
         (Some(ast), _) => match eval(&ast, &mut Vec::new(), &mut Vec::new()) {
             Ok(output) => Ok(output),

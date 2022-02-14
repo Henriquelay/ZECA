@@ -27,7 +27,7 @@ pub fn identifier_parser(
 /// TODO for radix != 10, preceded by 0b, 0t, 0x
 pub fn integer_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     text::int(10)
-        .map(|s: String| Expr::Val(Value::Num(Number::Integer(s.parse().unwrap()))))
+        .map(|s: String| Expr::Lit(Literal::Num(Number::Integer(s.parse().unwrap()))))
         .padded()
 }
 
@@ -38,7 +38,7 @@ pub fn float_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + 
         .then_ignore(just('.'))
         .then(text::digits(10).or_not())
         .map(|s: (String, Option<String>)| {
-            Expr::Val(Value::Num(Number::Float(
+            Expr::Lit(Literal::Num(Number::Float(
                 format!("{}.{}", s.0, s.1.unwrap_or("".to_string()))
                     .parse()
                     .unwrap(),
@@ -57,7 +57,7 @@ pub fn number_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
 pub fn boolean_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     just("true")
         .or(just("false"))
-        .map(|s| Expr::Val(Value::Bool(s.parse().unwrap())))
+        .map(|s| Expr::Lit(Literal::Bool(s.parse().unwrap())))
 }
 
 /// Parses the string type. Does not support escaping.
@@ -65,7 +65,7 @@ pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
     just('"')
         .ignore_then(take_until(just('"')))
         // .collect::<String>()
-        .map(|_| Expr::Val(Value::Bool(true)))
+        .map(|_| Expr::Lit(Literal::Bool(true)))
 }
 
 /// Parses expressions, made of `atom`s
@@ -125,9 +125,9 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
             .clone()
             .then(
                 op("==")
-                    .to(Expr::Equal as fn(_, _) -> _)
-                    .or(op("<").to(Expr::Less as fn(_, _) -> _))
-                    .or(op(">").to(Expr::Greater as fn(_, _) -> _))
+                    .to(Expr::Eq as fn(_, _) -> _)
+                    .or(op("<").to(Expr::Lt as fn(_, _) -> _))
+                    .or(op(">").to(Expr::Gt as fn(_, _) -> _))
                     .then(sum)
                     .repeated(),
             )

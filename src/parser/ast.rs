@@ -2,7 +2,7 @@
 
 /// Return values for ZECA
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
-pub enum Value {
+pub enum Literal {
     /// Numbers
     Num(Number),
     /// Boolean value
@@ -17,7 +17,7 @@ pub enum Value {
 #[derive(Debug)]
 pub enum Expr {
     /// Literals
-    Val(Value),
+    Lit(Literal),
 
     /// Negation expression. Both things like `-1` and `!true`
     Neg(Box<Expr>),
@@ -32,11 +32,11 @@ pub enum Expr {
     Div(Box<Expr>, Box<Expr>),
 
     /// Expr1 < Expr2
-    Less(Box<Expr>, Box<Expr>),
+    Lt(Box<Expr>, Box<Expr>),
     /// Expr1 > Expr2
-    Greater(Box<Expr>, Box<Expr>),
+    Gt(Box<Expr>, Box<Expr>),
     /// Expr1 == Expr2
-    Equal(Box<Expr>, Box<Expr>),
+    Eq(Box<Expr>, Box<Expr>),
 
     /// Function call expression. `()` operator placed after a symbol, as in `foo()`.
     Call(String, Vec<Expr>),
@@ -82,6 +82,7 @@ impl std::ops::Neg for Number {
     fn neg(self) -> Self::Output {
         match self {
             Self::Integer(x) => Self::Integer(-x),
+            // Notice the casting
             Self::UInteger(x) => Self::Integer(-(x as isize)),
             Self::Float(x) => Self::Float(-x),
         }
