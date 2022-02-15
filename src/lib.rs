@@ -45,6 +45,7 @@ macro_rules! for_every_number_Value_wrapped {
 /// Evaluates `Expr`'s  return value.
 fn eval<'a>(
     expr: &'a Expr,
+    // TODO(optimization) replace both symbol list with actual symbol tables
     vars: &mut Vec<(String, Literal)>,
     funcs: &mut Vec<(&'a String, &'a [String], &'a Expr)>,
 ) -> Result<Literal, String> {
@@ -90,18 +91,19 @@ fn eval<'a>(
             for_every_number_Value_wrapped!((left, right), |x, y| x / y)
         })),
         Expr::Var(name) => {
+            // Searches the variable on variables symbol table that matches name with invoked variable
             if let Some((_, value)) = vars.iter().rev().find(|(var, _)| var == name) {
                 Ok(*value)
             } else {
                 Err(format!("Cannot find variable `{}` in scope", name))
             }
         }
-        Expr::Let { name, rhs, then } => {
+        Expr::Let { name, rhs } => {
+            // Evaluates RHS first
             let rhs = eval(rhs, vars, funcs)?;
+            // Pushes name into variable symbol table
             vars.push((name.clone(), rhs));
-            let output = eval(then, vars, funcs);
-            vars.pop();
-            output
+            Ok(rhs)
         }
         Expr::Call(name, args) => {
             if let Some((_, arg_names, body)) = funcs

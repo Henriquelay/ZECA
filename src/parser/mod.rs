@@ -153,11 +153,9 @@ pub fn parser() -> impl Parser<char, Expr, Error = Simple<char>> {
             .then_ignore(just('='))
             .then(expr.clone())
             .then_ignore(just(';'))
-            .then(decl.clone())
-            .map(|((name, rhs), then)| Expr::Let {
+            .map(|(name, rhs)| Expr::Let {
                 name,
                 rhs: Box::new(rhs),
-                then: Box::new(then),
             });
 
         let r#fn = text::keyword("fn")

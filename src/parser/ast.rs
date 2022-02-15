@@ -52,7 +52,7 @@ pub enum Expr {
         then: Box<Expr>,
     },
 
-    /// Variable "calls"
+    /// Variable invocation
     Var(String),
     /// Variables declarations
     Let {
@@ -60,8 +60,6 @@ pub enum Expr {
         name: String,
         /// Value to be assigned to symbol.
         rhs: Box<Expr>,
-        /// Evaluated after symbol's own evaluation.
-        then: Box<Expr>,
     },
 }
 
