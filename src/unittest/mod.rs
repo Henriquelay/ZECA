@@ -245,6 +245,35 @@ pub fn expr() {
     )
 }
 
+
+#[test]
+pub fn function() {
+    test_util::tests(
+        |s| {
+            crate::parser::parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
+        },
+
+        vec![
+            "add(five, eight)",
+            "add(x)",
+            "add(x, y, z)",
+            //"fn args = body",
+            //"fn add x y = x + y;",
+            //"fn identifier(arg1, arg2) { body }",
+        ],
+        vec![
+            // "fn",
+            "fn (arg1, arg2) { body }",
+            "fn identifier(arg1, arg2)",
+            "identifier(arg1, arg2) { body }",
+            "(arg1, arg2)",
+            "{ body }",
+        ],
+    );
+}
+
 /*
 #[test]
 fn symbols() {
