@@ -42,92 +42,87 @@ macro_rules! for_every_number_Value_wrapped {
     };
 }
 
-/// Evaluates `Expr`'s  return value.
-fn eval<'a>(
+/// Evaluates return value.
+fn eval_expr<'a>(
     expr: &'a Expr,
-    // TODO(optimization) replace both symbol list with actual symbol tables
+    // TODO(optimization) replace both symbol list with actual symbol tables, not lists
     vars: &mut Vec<(String, Literal)>,
-    funcs: &mut Vec<(&'a String, &'a [String], &'a Expr)>,
+    funcs: &Vec<Function>,
 ) -> Result<Literal, String> {
     match expr {
-        Expr::Lit(x) => Ok(*x),
+        Expr::Literal(x) => Ok(*x),
         Expr::Lt(a, b) => Ok(Literal::Bool({
-            let left = eval(a, vars, funcs)?;
-            let right = eval(b, vars, funcs)?;
+            let left = eval_expr(a, vars, funcs)?;
+            let right = eval_expr(b, vars, funcs)?;
             for_every_number_Value!((left, right), |x, y| x < y)
         })),
         Expr::Gt(a, b) => Ok(Literal::Bool({
-            let left = eval(a, vars, funcs)?;
-            let right = eval(b, vars, funcs)?;
+            let left = eval_expr(a, vars, funcs)?;
+            let right = eval_expr(b, vars, funcs)?;
             for_every_number_Value!((left, right), |x, y| x > y)
         })),
         Expr::Eq(a, b) => Ok(Literal::Bool({
-            let left = eval(a, vars, funcs)?;
-            let right = eval(b, vars, funcs)?;
+            let left = eval_expr(a, vars, funcs)?;
+            let right = eval_expr(b, vars, funcs)?;
             for_every_number_Value!((left, right), |x, y| x == y)
         })),
-        Expr::Neg(a) => match eval(a, vars, funcs)? {
+        Expr::Neg(a) => match eval_expr(a, vars, funcs)? {
             Literal::Num(x) => Ok(Literal::Num(-x)),
             Literal::Bool(x) => Ok(Literal::Bool(!x)),
+            Literal::Null => Ok(Literal::Null),
         },
         Expr::Add(a, b) => Ok(Literal::Num({
-            let left = eval(a, vars, funcs)?;
-            let right = eval(b, vars, funcs)?;
+            let left = eval_expr(a, vars, funcs)?;
+            let right = eval_expr(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x + y)
         })),
         Expr::Sub(a, b) => Ok(Literal::Num({
-            let left = eval(a, vars, funcs)?;
-            let right = eval(b, vars, funcs)?;
+            let left = eval_expr(a, vars, funcs)?;
+            let right = eval_expr(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x - y)
         })),
         Expr::Mul(a, b) => Ok(Literal::Num({
-            let left = eval(a, vars, funcs)?;
-            let right = eval(b, vars, funcs)?;
+            let left = eval_expr(a, vars, funcs)?;
+            let right = eval_expr(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x * y)
         })),
         Expr::Div(a, b) => Ok(Literal::Num({
-            let left = eval(a, vars, funcs)?;
-            let right = eval(b, vars, funcs)?;
+            let left = eval_expr(a, vars, funcs)?;
+            let right = eval_expr(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x / y)
         })),
         Expr::Var(name) => {
             // Searches the variable on variables symbol table that matches name with invoked variable
-            if let Some((_, value)) = vars.iter().rev().find(|(var, _)| var == name) {
+            let search_var = |name| vars.iter().rev().find(|(var, _)| var == name);
+            if let Some((_, value)) = search_var(name) {
                 Ok(*value)
             } else {
                 Err(format!("Cannot find variable `{}` in scope", name))
             }
         }
-        Expr::Let { name, rhs } => {
-            // Evaluates RHS first
-            let rhs = eval(rhs, vars, funcs)?;
-            // Pushes name into variable symbol table
-            vars.push((name.clone(), rhs));
-            Ok(rhs)
-        }
         Expr::Call(name, args) => {
-            if let Some((_, arg_names, body)) = funcs
-                .iter()
-                .rev()
-                .find(|(var, _, _)| var == &name)
-                .copied()
-            {
-                if arg_names.len() == args.len() {
+            // Retrieve the callee signature
+            if let Some(function) = funcs.iter().rev().find(|function| function.name == *name) {
+                if function.args.len() == args.len() {
+                    // Combine passed args to argument name as `(name, Value)`, similar to variables
                     let mut args = args
                         .iter()
-                        .map(|arg| eval(arg, vars, funcs))
-                        .zip(arg_names.iter())
+                        .map(|arg| eval_expr(arg, vars, funcs))
+                        .zip(function.args.iter())
                         .map(|(val, name)| Ok((name.clone(), val?)))
                         .collect::<Result<_, String>>()?;
+                    // Include passed variables to the scope inside the function
                     vars.append(&mut args);
-                    let output = eval(body, vars, funcs);
+                    // Evaluated the function result
+                    let output = eval(&function.body, vars, funcs);
+                    // Remove passed vars from scope, as the score is outside the function now
                     vars.truncate(vars.len() - args.len());
                     output
                 } else {
                     Err(format!(
                         "Wrong number of arguments for function `{}`: expected {}, found {}",
                         name,
-                        arg_names.len(),
+                        function.args.len(),
                         args.len(),
                     ))
                 }
@@ -135,27 +130,60 @@ fn eval<'a>(
                 Err(format!("Cannot find function `{}` in scope", name))
             }
         }
-        Expr::Fn {
-            name,
-            args,
-            body,
-            then,
-        } => {
-            funcs.push((&name, &args, &body));
-            let output = eval(then, vars, funcs);
-            funcs.pop();
-            output
-        }
     }
 }
 
-/// Evaluates souce string using [`parser()`]
+/// Evaluates return value.
+fn eval<'a>(
+    blk: &'a Block,
+    // TODO(optimization) replace both symbol list with actual symbol tables, not lists
+    vars: &mut Vec<(String, Literal)>,
+    funcs: &Vec<Function>,
+) -> Result<Literal, String> {
+    let mut last_statement = None;
+    for statement in blk.0.clone() {
+        last_statement = Some(match statement {
+            Statement::Expr(expr) => eval_expr(&expr, vars, funcs)?,
+            Statement::Item(item) => match item {
+                _ => todo!(),
+            },
+            Statement::Let { name, rhs } => {
+                // Evaluates RHS first
+                let rhs = eval_expr(&rhs, vars, funcs)?;
+                // Pushes name into variable symbol table
+                vars.push((name.clone(), rhs));
+                rhs
+            }
+            Statement::Null => Literal::Null,
+        })
+    }
+    Ok(last_statement.unwrap())
+}
+
+/// Evaluates source string using [`parser()`].
 pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
     match parser().then_ignore(end()).parse_recovery_verbose(src) {
-        (Some(ast), _) => match eval(&ast, &mut Vec::new(), &mut Vec::new()) {
-            Ok(output) => Ok(output),
-            Err(eval_err) => Err(vec![format!("Evaluation error: {:?}", eval_err)]),
-        },
+        // Extract `main()` function
+        (Some(ast), _) => {
+            if let Some(Item::Function(main)) = ast.iter().find(|&item| match item {
+                Item::Function(Function { name, args: _, body: _ }) => name == "main",
+            }) {
+                // Register all function items
+                let mut funcs = ast.iter().map(|item| match item {
+                    Item::Function(f) => f.to_owned(),
+                    // _ => unreachable!(),
+                }).collect();
+                // Evaluate `main(){ }
+                match eval(&main.body, &mut Vec::new(), &mut funcs) {
+                    Ok(output) => Ok(output),
+                    Err(eval_err) => Err(vec![format!("Evaluation error: {:?}", eval_err)]),
+                }
+            } else {
+                Err(vec![
+                    "Syntax error: No function named `main` in top-level items.".to_string(),
+                ])
+            }
+        }
         (None, parse_errs) => Err(parse_errs
             .into_iter()
             .map(|e| format!("Parse error: {:?}", e))

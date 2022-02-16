@@ -11,6 +11,7 @@ where
     parsed.unwrap()
 }
 
+// FIXME block need to return eval of last element
 #[test]
 fn simple() {
     let expected_value = 13.06;
@@ -23,6 +24,8 @@ fn simple() {
     assert!(f64::abs(val - expected_value) < delta);
 }
 
+
+// FIXME block need to return eval of last element
 #[test]
 fn negation() {
     let expected_value = -3.;

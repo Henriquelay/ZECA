@@ -245,27 +245,23 @@ pub fn expr() {
     )
 }
 
-
 #[test]
-pub fn function() {
+pub fn item() {
     test_util::tests(
         |s| {
-            crate::parser::parser()
+            crate::parser::item_parser()
                 .then_ignore(end())
                 .parse_recovery_verbose(s)
         },
-
         vec![
-            "add(five, eight)",
-            "add(x)",
-            "add(x, y, z)",
-            //"fn args = body",
-            //"fn add x y = x + y;",
-            //"fn identifier(arg1, arg2) { body }",
+            "fn identifier(arg1, arg2) {
+                arg1 + arg2;
+            }",
+            "fn identifier() {}",
         ],
         vec![
-            // "fn",
-            "fn (arg1, arg2) { body }",
+            "fn (x, y) {}",
+            "fn identifier {}",
             "fn identifier(arg1, arg2)",
             "identifier(arg1, arg2) { body }",
             "(arg1, arg2)",
@@ -274,9 +270,54 @@ pub fn function() {
     );
 }
 
+// TODO make some more tests
+#[test]
+pub fn statement() {
+    test_util::tests(
+        |s| {
+            crate::parser::statement_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
+        },
+        vec![
+            // TODO
+            //";",
+            "12 + 3;",
+            "- 12 +3 - 4 / 5;",
+            "add(x, y);",
+            "let x = 1;",
+        ],
+        vec!["12", r#""Termina sem ;""#],
+    );
+}
+
+// TODO make some more tests
+#[test]
+pub fn block() {
+    test_util::tests(
+        |s| {
+            crate::parser::block_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
+        },
+        vec![
+            "{}",
+            "{add(x);}",
+            "{
+                add(x);
+            }",
+            "{
+                add(x);
+                sub(y);
+            }",
+        ],
+        vec![],
+    );
+}
+
 #[test]
 #[ignore]
-pub fn _loop() {
+pub fn r#loop() {
     /*     test_util::tests(
         |s| {
             crate::parser::loop_parser()
@@ -321,7 +362,7 @@ pub fn conditional() {
 
 #[test]
 #[ignore]
-pub fn _struct() {
+pub fn r#struct() {
     /*     test_util::tests(
         |s| {
             crate::parser::struct_parser()

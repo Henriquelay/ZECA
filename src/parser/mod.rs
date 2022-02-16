@@ -5,7 +5,9 @@ use chumsky::{prelude::*, text::Character};
 pub mod ast;
 use ast::*;
 
-/// Parses a single inline or block comment
+// Terminals (not made from other types) {
+
+/// Parses a single inline or block comment.
 pub fn comment_parser() -> impl Parser<char, (), Error = Simple<char>> + Clone + Copy {
     // Parse "//"
     let inline_comment = just("//")
@@ -18,35 +20,35 @@ pub fn comment_parser() -> impl Parser<char, (), Error = Simple<char>> + Clone +
     // let nested_block_comment = recursive(|nested_comment| {
     //     single_block_comment.or(single_block_comment.delimited_by(nested_comment.clone(), nested_comment))
     // }).ignored();
-    
+
     // Parse block or inline comments
     single_block_comment.or(inline_comment)
 }
 
-/// Parses identifiers (variable/function names), defined as per [`chumsky::text::ident()`]
+/// Parses identifiers (variable/function names), defined as per [`chumsky::text::ident()`].
 pub fn identifier_parser(
 ) -> impl Parser<char, <char as Character>::Collection, Error = Simple<char>> + Copy + Clone {
     text::ident().padded()
 }
 
-/// Parses an integer number of radix 10
-/// TODO for radix != 10, preceded by 0b, 0t, 0x
+/// Parses an integer number of radix 10.
+/// TODO for radix != 10, preceded by 0b, 0t, 0x.
 pub fn integer_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     // Parse for base 10
     text::int(10)
-        // Parse with Rust .parse() method
-        .map(|s: String| Expr::Lit(Literal::Num(Number::Integer(s.parse().unwrap()))))
+        .map(|s: String| Expr::Literal(Literal::Num(Number::Integer(s.parse().unwrap()))))
+        .padded()
 }
 
-/// Parses a floating-point number
-/// TODO scientific notation
+/// Parses a floating-point number.
+/// TODO scientific notation.
 pub fn float_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     // Try to match a integer, then a dot, then another series of digits
     text::int::<_, Simple<char>>(10)
         .then_ignore(just('.'))
         .then(text::digits(10).or_not())
         .map(|s: (String, Option<String>)| {
-            Expr::Lit(Literal::Num(Number::Float(
+            Expr::Literal(Literal::Num(Number::Float(
                 // The number after the dot can be omitted (e.g.: "2." is a float)
                 format!("{}.{}", s.0, s.1.unwrap_or("".to_string()))
                     .parse()
@@ -66,7 +68,7 @@ pub fn number_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
 pub fn boolean_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     just("true")
         .or(just("false"))
-        .map(|s| Expr::Lit(Literal::Bool(s.parse().unwrap())))
+        .map(|s| Expr::Literal(Literal::Bool(s.parse().unwrap())))
 }
 
 /// Parses the string type. Does not support escaping.
@@ -74,11 +76,66 @@ pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
     just('"')
         .ignore_then(take_until(just('"')))
         // .collect::<String>()
-        // que
-        .map(|_| Expr::Lit(Literal::Bool(true)))
+        .map(|_| Expr::Literal(Literal::Bool(true)))
 }
 
-/// Parses expressions, made of `atom`s
+// }
+// Non-terminal (Composite types) {
+
+/// A statement is a component of a block, which is in turn a component of an outer expression or function.
+pub fn statement_parser() -> impl Parser<char, Statement, Error = Simple<char>> + Clone {
+    // TODO empty statement `;`. Map it to Statement::Null
+    let identifier = identifier_parser();
+    // let item = item_parser().map(|s| Statement::Item(Box::new(s)));
+    let expr = expr_parser();
+    let r#let = text::keyword("let")
+        .ignore_then(identifier)
+        .then_ignore(just('='))
+        .then(expr.clone())
+        .map(|(name, rhs)| Statement::Let {
+            name,
+            rhs: Box::new(rhs),
+        });
+    r#let
+        // .or(item) // FIXME can't declare nested functions
+        .or(expr.map(|s| Statement::Expr(s)))
+        .then_ignore(just(";"))
+}
+
+/// Parses a
+pub fn block_parser() -> impl Parser<char, Block, Error = Simple<char>> + Clone {
+    let statement = statement_parser();
+    let comment = comment_parser();
+    statement
+        .padded_by(comment.padded().repeated())
+        .padded()
+        .repeated()
+        .delimited_by(just("{"), just("}"))
+        .map(|s| Block(s))
+}
+
+/// An item is a component of a crate. Items are organized within a crate by a nested set of modules. Every crate has a single "outermost" anonymous module; all further items within the crate have paths within the module tree of the crate.
+/// A function consists of a block, along with a name and a set of parameters. Other than a name, all these are optional. Functions are declared with the keyword fn. Functions may declare a set of input variables as parameters, through which the caller passes arguments into the function, and the output type of the value the function will return to its caller on completion.
+pub fn item_parser() -> impl Parser<char, Item, Error = Simple<char>> + Clone {
+    let identifier = identifier_parser();
+    let block = block_parser();
+    let function = text::keyword("fn")
+        .ignore_then(identifier)
+        .then_ignore(just("("))
+        .then(identifier.then_ignore(just(',').or_not()).repeated())
+        .then_ignore(just(")"))
+        .then(block.padded())
+        .map(|((name, args), body)| {
+            Item::Function(Function {
+                name,
+                args,
+                body: Box::new(body),
+            })
+        });
+    function
+}
+
+/// Parses expressions, made of `atom`s.
 pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
     let identifier = identifier_parser();
 
@@ -147,48 +204,17 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
         comparation.padded()
     })
 }
+// }
 
-/// Parses the program for correct tokens and tokens order.
+/// Parses the whole program for correct tokens and tokens order.
 /// Finished parsers are stored into variables and no call should be made to the variable itself, only chaining methods.
 /// Should NOT expect any kind of end-of-file ([`end()`][chumsky::prelude::end()]), as it will interfere with unitary tests and instead should be prepended when [`parser.parse()`][chumsky::Parser::parse()] is called, usually with `then_ignore(end())`.
-pub fn parser() -> impl Parser<char, Expr, Error = Simple<char>> {
+/// Returns all items (top level constructs).
+pub fn parser() -> impl Parser<char, Vec<Item>, Error = Simple<char>> {
     let comment = comment_parser();
+    let item = item_parser();
 
-    let identifier = identifier_parser();
-
-    let expr = expr_parser();
-
-    let decl = recursive(|decl| {
-        let r#let = text::keyword("let")
-            .ignore_then(identifier)
-            .then_ignore(just('='))
-            .then(expr.clone())
-            .then_ignore(just(';'))
-            .map(|(name, rhs)| Expr::Let {
-                name,
-                rhs: Box::new(rhs),
-            });
-
-        let r#fn = text::keyword("fn")
-            .ignore_then(identifier)
-            .then(identifier.repeated())
-            .then_ignore(just('='))
-            .then(expr.clone())
-            .then_ignore(just(';'))
-            .then(decl)
-            .map(|(((name, args), body), then)| Expr::Fn {
-                name,
-                args,
-                body: Box::new(body),
-                then: Box::new(then),
-            });
-
-        r#let
-            .or(r#fn)
-            .or(expr)
-            .padded_by(comment.padded().repeated())
-            .padded()
-    });
-
-    decl
+    item.padded_by(comment.padded().repeated())
+        .repeated()
+        .padded()
 }

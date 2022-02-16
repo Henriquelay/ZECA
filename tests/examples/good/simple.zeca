@@ -1,8 +1,11 @@
-let five = 5.03;
-// some comments
-let eight = 3.0 + five;
-/* some more
-comments */
-let t = true;
-fn add x y = x + y;
-add(five, eight)
+fn main() {
+    let five = 5.03;
+    // some comments
+    let eight = 3.0 + five;
+    /* some more
+    comments */
+    let t = true;
+    // Nested function are not implemented
+    // fn add (x, y) {x + y}
+    // add(five, eight);
+}
