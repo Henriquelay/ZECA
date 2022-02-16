@@ -7,13 +7,19 @@ use ast::*;
 
 /// Parses a single inline or block comment
 pub fn comment_parser() -> impl Parser<char, (), Error = Simple<char>> + Clone + Copy {
+    // Parse "//"
     let inline_comment = just("//")
+        // Ignore input until newline
         .ignore_then(take_until(text::newline()))
+        // Don't allocate memory for this
         .ignored();
     let single_block_comment = just("/*").ignore_then(take_until(just("*/"))).ignored();
+
     // let nested_block_comment = recursive(|nested_comment| {
     //     single_block_comment.or(single_block_comment.delimited_by(nested_comment.clone(), nested_comment))
     // }).ignored();
+    
+    // Parse block or inline comments
     single_block_comment.or(inline_comment)
 }
 
@@ -26,19 +32,22 @@ pub fn identifier_parser(
 /// Parses an integer number of radix 10
 /// TODO for radix != 10, preceded by 0b, 0t, 0x
 pub fn integer_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
+    // Parse for base 10
     text::int(10)
+        // Parse with Rust .parse() method
         .map(|s: String| Expr::Lit(Literal::Num(Number::Integer(s.parse().unwrap()))))
-        .padded()
 }
 
 /// Parses a floating-point number
 /// TODO scientific notation
 pub fn float_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
+    // Try to match a integer, then a dot, then another series of digits
     text::int::<_, Simple<char>>(10)
         .then_ignore(just('.'))
         .then(text::digits(10).or_not())
         .map(|s: (String, Option<String>)| {
             Expr::Lit(Literal::Num(Number::Float(
+                // The number after the dot can be omitted (e.g.: "2." is a float)
                 format!("{}.{}", s.0, s.1.unwrap_or("".to_string()))
                     .parse()
                     .unwrap(),
@@ -65,6 +74,7 @@ pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
     just('"')
         .ignore_then(take_until(just('"')))
         // .collect::<String>()
+        // que
         .map(|_| Expr::Lit(Literal::Bool(true)))
 }
 
@@ -80,7 +90,8 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
             .then(
                 expr.clone()
                     .separated_by(just(','))
-                    .allow_trailing() // Foo is Rust-like, so allow trailing commas to appear in arg lists
+                    // Allow trailing commas to appear in arg lists
+                    .allow_trailing()
                     .delimited_by(just('('), just(')')),
             )
             .map(|(f, args)| Expr::Call(f, args));

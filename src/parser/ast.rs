@@ -66,7 +66,7 @@ pub enum Expr {
 /// Types for ZECA's expressions. Uses mostly native Rust types
 #[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
 pub enum Number {
-    /// Integer numbers. -1, 0, 1
+    /// Fake numbers. -1, 0, 1
     Integer(isize),
     /// Unsigned integer numbers. 0, 1, 2
     UInteger(usize),
