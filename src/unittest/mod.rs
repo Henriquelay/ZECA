@@ -274,6 +274,74 @@ pub fn function() {
     );
 }
 
+#[test]
+#[ignore]
+pub fn _loop() {
+    /*     test_util::tests(
+        |s| {
+            crate::parser::loop_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
+        },
+        vec![
+            "loop {{}}",
+            "loop {{body}}",
+            "loop {{
+                body;
+                break;
+            }}",
+        ],
+        vec![
+            "loop (cond) {{}}",
+            "loop",
+            "{{}}",
+
+        ],
+    ); */
+}
+
+#[test]
+#[ignore]
+pub fn conditional() {
+    /*     test_util::tests(
+        |s| {
+            crate::parser::conditional_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
+        },
+        vec![
+            "if (true) {{}}",
+            "if (false) {{}}",
+            "if (true) {{}} else {{}}",
+            "if (cond) {{}} else {{}}",
+        ],
+        vec!["else {}", "if", "if (cond)"],
+    ); */
+}
+
+#[test]
+#[ignore]
+pub fn _struct() {
+    /*     test_util::tests(
+        |s| {
+            crate::parser::struct_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
+        },
+        vec![
+            "struct identifier {{}}",
+            "struct identifier {{
+                identifier2: type;
+            }}",
+        ],
+        vec![
+            "struct {{}}",
+            // "struct identifier",
+            "identifier {{}}",
+        ],
+    ); */
+}
+
 /*
 #[test]
 fn symbols() {
