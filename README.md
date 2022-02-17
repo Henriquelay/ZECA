@@ -1,7 +1,8 @@
 # ZECA
 
-Zero Efficiency Compiler: Augmented  
-Rust -> LLVM compiler written in Rust using [Chumsky] library.
+Zero Efficiency Compiler: Augmented
+
+A Rust -> LLVM compiler written in Rust using [Chumsky] library.
 
 ## Requirements
 
@@ -13,9 +14,10 @@ Rust -> LLVM compiler written in Rust using [Chumsky] library.
 
 ## Using the compiler
 
+It is possible to build the project in several ways:
 ### Without installation
 
-While in any folder withing the project, run:
+While in any folder within the project, run:
 
 ```sh
 cargo run --release path/to/source/file # or, alternatively:
@@ -31,7 +33,7 @@ cargo r path/to/source/file
 
 ### Installing
 
-While on project root folder, run:
+While on the project root folder, run:
 
 ```sh
 cargo install --path .
@@ -42,8 +44,8 @@ Then, simply call `zeca path/to/source/file`.
 
 ## Tests
 
-Unit tests are avaiable under `src/` as test modules for Cargo.  
-Integration tests are avaiable under `tests/` and may either read from example files (`tests/examples`) or input directly as hardcoded strings, when arbitrarialy deemed simples enough.
+Unit tests are available under `src/` as test modules for Cargo.
+Integration tests are available under `tests/` and may either read from example files (`tests/examples`) or input directly as hardcoded strings, when arbitrarily deemed simple enough.
 
 Both are discarded in the final binary (virtue of using `--release` flag).
 
@@ -60,16 +62,25 @@ cargo t
 
 ## Documentation
 
-Using Rustdoc's Cargo integration, if you have Rustdoc intalled (added by default if intalled by Rustup's toolchain) simply run:
+To build the documentation website for ZECA and Chumsky (the major library used on this project) using Rustdoc's Cargo integration, if you have Rustdoc installed (included by default if installed with Rustup's toolchain), simply run:
 
 ```sh
 cargo doc --package zeca --package chumsky --no-deps --release
 ```
 
-To build documentation website for ZECA and Chumsky, the major library used on this project.  
-Other dependencies are hidden to avoid confusion.
+You can then conveniently read the docs by running
 
-Thanks a lot to [Chumsky] mantainers!
+```sh
+cargo doc --open
+```
+
+*Other dependencies are hidden to avoid confusion.
+
+## License
+
+ZECA is licensed under the GPL-3 license (for reference, see the `LICENSE` file), which is compatible with [Chumsky]'s MIT license.
+
+Since ZECA builds heavily upon Chumsky, we'd like to thank [Chumsky] maintainers!
 
 [Chumsky]: https://github.com/zesterer/chumsky
 [Rust install]: https://www.rust-lang.org/tools/install
