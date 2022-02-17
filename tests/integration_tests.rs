@@ -76,6 +76,29 @@ fn all_features() {
     assert!(f64::abs(val - expected_value) < delta);
 }
 
+#[test]
+fn expr_simple() {
+    let expected_value = 2.;
+    let delta = 1e-10;
+    let val = parse_file("tests/examples/good/expr_simple.zeca");
+    let val = match val {
+        Literal::Num(Number::Float(x)) => x,
+        _ => panic!(),
+    };
+    assert!(f64::abs(val - expected_value) < delta);
+}
+
+#[test]
+fn string() {
+    let expected_value = "henrique, atílio e luana";
+    let delta = 1e-10;
+    let val = parse_file("tests/examples/good/string.zeca");
+    let val = match val {
+        Literal::Num(Number::Float(x)) => x,
+        _ => panic!(),
+    };
+    assert!(f64::abs(val - expected_value) < delta);
+}
 
 // #[ignore]
 // #[test]
