@@ -63,3 +63,16 @@ fn conditional() {
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
+
+#[ignore]
+#[test]
+fn all_features() {
+    let expected_value = 6.;
+    let delta = 1e-10;
+    let val = parse_file("tests/examples/good/all_features.zeca");
+    let val = match val {
+        Literal::Num(Number::Float(x)) => x,
+        _ => panic!(),
+    };
+    assert!(f64::abs(val - expected_value) < delta);
+}
