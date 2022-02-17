@@ -75,3 +75,31 @@ fn all_features() {
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
+
+
+// #[ignore]
+// #[test]
+// fn bool() {
+//     let expected_value = false;
+//     let delta = 1e-10;
+//     let val = parse_file("tests/examples/good/bool.zeca");
+//     let val = match val {
+//         Literal::Num(Number::Float(x)) => x,
+//         _ => panic!(),
+//     };
+//     assert!(f64::abs(val - expected_value) < delta);
+// }
+
+
+// #[ignore]
+// #[test]
+// fn expr() {
+//     let expected_value = 6.25;
+//     let delta = 1e-10;
+//     let val = parse_file("tests/examples/good/expr.zeca");
+//     let val = match val {
+//         Literal::Num(Number::Float(x)) => x,
+//         _ => panic!(),
+//     };
+//     assert!(f64::abs(val - expected_value) < delta);
+// }
