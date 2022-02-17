@@ -76,7 +76,7 @@ pub struct Function {
     /// Function name symbol
     pub name: String,
     // TODO argument typing
-    /// List of function argument names. 
+    /// List of function argument names.
     pub args: Vec<String>,
     /// Function body, a block of statements.
     pub body: Box<Block>,
@@ -98,7 +98,7 @@ impl PartialOrd for Function {
 #[derive(Debug, Clone)]
 pub enum Item {
     /// A function declaration
-    Function(Function)
+    Function(Function),
 }
 
 /// A statement. Can be wither a Block or a StatementWithoutBlock.

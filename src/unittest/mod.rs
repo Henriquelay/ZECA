@@ -52,7 +52,7 @@ fn comment() {
                 "/incomplete",
                 "/incomplete/",
                 // FIXME Didn't handle empty comment very well (shouldn't be a comment)
-                // "", 
+                // "",
                 " ",
             ],
             vec![

@@ -2,20 +2,23 @@ use std::fmt::Debug;
 
 use chumsky::prelude::Simple;
 
-pub fn ok<P, T, O>(parser: P, iterable: T)
--> Vec<O> where
+pub fn ok<P, T, O>(parser: P, iterable: T) -> Vec<O>
+where
     O: Debug,
     T: IntoIterator,
     T::Item: AsRef<str> + Debug,
     P: Fn(T::Item) -> (Option<O>, Vec<Simple<char>>),
 {
-    iterable.into_iter().map(|t| {
-        println!(">Testing ok: {:?}", t);
-        let parsed = parser(t);
-        println!("Parse result: {:?}", parsed);
-        assert!(parsed.0.is_some());
-        parsed.0.unwrap()
-    }).collect()
+    iterable
+        .into_iter()
+        .map(|t| {
+            println!(">Testing ok: {:?}", t);
+            let parsed = parser(t);
+            println!("Parse result: {:?}", parsed);
+            assert!(parsed.0.is_some());
+            parsed.0.unwrap()
+        })
+        .collect()
 }
 
 pub fn err<P, T, O>(parser: P, iterable: T)

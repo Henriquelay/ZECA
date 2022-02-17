@@ -1,4 +1,4 @@
-use zeca::parser::ast::{Number, Literal};
+use zeca::parser::ast::{Literal, Number};
 
 fn parse_file<P>(path: P) -> Literal
 where
@@ -23,7 +23,6 @@ fn simple() {
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
-
 
 // FIXME block need to return eval of last element
 #[test]

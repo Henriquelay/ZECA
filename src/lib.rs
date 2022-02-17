@@ -168,13 +168,20 @@ pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
         // Extract `main()` function
         (Some(ast), _) => {
             if let Some(Item::Function(main)) = ast.iter().find(|&item| match item {
-                Item::Function(Function { name, args: _, body: _ }) => name == "main",
+                Item::Function(Function {
+                    name,
+                    args: _,
+                    body: _,
+                }) => name == "main",
             }) {
                 // Register all function items
-                let mut funcs = ast.iter().map(|item| match item {
-                    Item::Function(f) => f.to_owned(),
-                    // _ => unreachable!(),
-                }).collect();
+                let mut funcs = ast
+                    .iter()
+                    .map(|item| match item {
+                        Item::Function(f) => f.to_owned(),
+                        // _ => unreachable!(),
+                    })
+                    .collect();
                 // Evaluate `main(){ }
                 match eval(&main.body, &mut Vec::new(), &mut funcs) {
                     Ok(output) => Ok(output),
