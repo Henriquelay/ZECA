@@ -51,7 +51,8 @@ fn comment() {
                 "something before // comment ",
                 "/incomplete",
                 "/incomplete/",
-                // "", // Didn't handle empty comment very well
+                // FIXME Didn't handle empty comment very well (shouldn't be a comment)
+                // "", 
                 " ",
             ],
             vec![
@@ -130,7 +131,7 @@ pub fn float() {
         vec![
             "2.0",
             "2.",
-            // TODO[epic-scientific-notation] enable scientific notation tests
+            // ANCHOR[id=scientific-notation-test]
             // "12E+99",
             // "12.01E+99",
             // "123.0f64", "0.1f64", "0.1f32", "5f32",
@@ -159,7 +160,7 @@ pub fn identifiers() {
             "foo",
             "_identifier",
             "_",
-            // TODO[epic-unicode] Enable unicode tests for ident
+            // ANCHOR[id=unicode-tests]
             // "Москва",
             // "東京",
             // "💯",

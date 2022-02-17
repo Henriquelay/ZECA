@@ -25,7 +25,8 @@ pub fn comment_parser() -> impl Parser<char, (), Error = Simple<char>> + Clone +
     single_block_comment.or(inline_comment)
 }
 
-// TODO[epic-unicode] Update to support unicode XID.
+// TODO Update to support unicode XID.
+// LINK ../unittest/mod.rs#unicode-tests
 /// Parses identifiers (variable/function names), defined as per [`chumsky::text::ident()`].
 pub fn identifier_parser(
 ) -> impl Parser<char, <char as Character>::Collection, Error = Simple<char>> + Copy + Clone {
@@ -33,7 +34,7 @@ pub fn identifier_parser(
 }
 
 /// Parses an integer number of radix 10.
-/// TODO for radix != 10, preceded by 0b, 0t, 0x.
+// TODO for radix != 10, preceded by 0b, 0t, 0x.
 pub fn integer_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     // Parse for base 10
     text::int(10)
@@ -41,8 +42,9 @@ pub fn integer_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy 
         .padded()
 }
 
+// TODO parse scientific notation.
+// LINK ../unittest/mod.rs#scientific-notation-test
 /// Parses a floating-point number.
-/// TODO[epic-scientific-notation] parse scientific notation.
 pub fn float_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     // Try to match a integer, then a dot, then another series of digits
     text::int::<_, Simple<char>>(10)
@@ -86,7 +88,7 @@ pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
 /// A statement is a component of a block, which is in turn a component of an outer expression or function.
 pub fn statement_parser() -> impl Parser<char, Statement, Error = Simple<char>> + Clone {
     let identifier = identifier_parser();
-    // TODO nested items
+    // TODO nested itemsQ
     // let item = item_parser().map(|s| Statement::Item(Box::new(s)));
     let expr = expr_parser();
     let r#let = text::keyword("let")

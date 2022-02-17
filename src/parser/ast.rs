@@ -75,7 +75,8 @@ impl std::ops::Neg for Number {
 pub struct Function {
     /// Function name symbol
     pub name: String,
-    /// List of function argument names. TODO: typing
+    // TODO argument typing
+    /// List of function argument names. 
     pub args: Vec<String>,
     /// Function body, a block of statements.
     pub body: Box<Block>,
