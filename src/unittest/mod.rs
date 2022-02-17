@@ -226,6 +226,7 @@ pub fn expr() {
         vec![
             "1",
             "-1",
+            "-1-1",
             "1 + 1",
             "1-1",
             "1 * 1",
@@ -234,14 +235,39 @@ pub fn expr() {
             "1 - 1 / 1 - 1",
             "- 1 - 1 / 1 - 1",
             "1 > -1",
+            // "+1", // Será
+            // "-1 < +1",
+            "-1 < 1",
+            "-1 < 1",
             "1 == 1",
             "1 < 1",
             "1 - 1 == 1 - 1",
             "1 * 4 == 4 / 1",
             "- 1 *  -4 == 4 / 1",
+            "- - 1",
+            "--1",
             r#""str ainda estão dentro de expr.""#,
         ],
-        vec!["1+", "+1+"],
+        vec![
+            "1+",
+            "+1+",
+            "1-",
+            "/1",
+            "*1",
+            "1*",
+            "1/",
+            "1/",
+            "-1-",
+            "+1+",
+            "1 + 1 - 1 / 1 * 1 +",
+            "1 + 1 - 1 / 1 *",
+            "1 + 1 - 1 /",
+            "1 + 1 -",
+            "-",
+            "+",
+            "/",
+            "*",
+        ],
     )
 }
 
@@ -254,23 +280,36 @@ pub fn item() {
                 .parse_recovery_verbose(s)
         },
         vec![
+            "fn identifier() {}",
+            "fn identifier() {body}",
+            "fn identifier(args) {}",
+            "fn identifier(args) {body}",
+            "fn identifier(arg) {
+                arg
+            }",
             "fn identifier(arg1, arg2) {
                 arg1 + arg2;
             }",
-            "fn identifier() {}",
         ],
         vec![
+            "fn {}",
+            "fn (x, y)",
             "fn (x, y) {}",
+            "fn identifier",
+            "fn identifier()",
             "fn identifier {}",
+            "fn identifier {}",
+            "fn identifier { body }",
+            "fn (args) { body }",
             "fn identifier(arg1, arg2)",
             "identifier(arg1, arg2) { body }",
             "(arg1, arg2)",
             "{ body }",
+            "{}",
         ],
     );
 }
 
-// TODO make some more tests
 #[test]
 pub fn statement() {
     test_util::tests(
@@ -284,7 +323,11 @@ pub fn statement() {
             "12 + 3;",
             "- 12 +3 - 4 / 5;",
             "add(x, y);",
+            "let z = add(x, y);",
             "let x = 1;",
+            "let x = 1 + 2;",
+            "let x = 1 - 1;",
+            "let x = - 1 + 1;",
         ],
         vec!["12", r#""Termina sem ;""#],
     );
@@ -301,6 +344,7 @@ pub fn block() {
         },
         vec![
             "{}",
+            "{{}}", // Será
             "{add(x);}",
             "{
                 add(x);
@@ -309,8 +353,10 @@ pub fn block() {
                 add(x);
                 sub(y);
             }",
+            "{
+            }",
         ],
-        vec![],
+        vec!["}", "{"],
     );
 }
 
