@@ -1,0 +1,10 @@
+fn main() {
+    let x = true;
+    let y = false;
+    
+    /* some more
+    comments */
+    
+    let xory = x || y;
+    let xandy = x && y;
+}
