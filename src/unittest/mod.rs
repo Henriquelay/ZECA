@@ -130,7 +130,7 @@ pub fn float() {
         vec![
             "2.0",
             "2.",
-            // TODO scientific notation
+            // TODO[epic-scientific-notation] enable scientific notation tests
             // "12E+99",
             // "12.01E+99",
             // "123.0f64", "0.1f64", "0.1f32", "5f32",
@@ -159,7 +159,7 @@ pub fn identifiers() {
             "foo",
             "_identifier",
             "_",
-            // FIXME update to unicode XID
+            // TODO[epic-unicode] Enable unicode tests for ident
             // "Москва",
             // "東京",
             // "💯",
@@ -238,7 +238,6 @@ pub fn expr() {
             "1 - 1 == 1 - 1",
             "1 * 4 == 4 / 1",
             "- 1 *  -4 == 4 / 1",
-            // TODO
             r#""str ainda estão dentro de expr.""#,
         ],
         vec!["1+", "+1+"],
@@ -280,8 +279,7 @@ pub fn statement() {
                 .parse_recovery_verbose(s)
         },
         vec![
-            // TODO
-            //";",
+            ";",
             "12 + 3;",
             "- 12 +3 - 4 / 5;",
             "add(x, y);",

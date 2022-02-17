@@ -1,3 +1,8 @@
+// Nested functions are not implemented
+fn add (x, y) {
+    x + y;
+}
+
 fn main() {
     let x = - 5.03;
     // some comments
@@ -5,7 +10,5 @@ fn main() {
     /* some more
     comments */
     let t = true;
-    // Nested function are not implemented
-    // fn add x y = x + y;
-    // add(x, y)
+    add(x, y);
 }

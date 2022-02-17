@@ -50,7 +50,7 @@ fn eval_expr<'a>(
     funcs: &Vec<Function>,
 ) -> Result<Literal, String> {
     match expr {
-        Expr::Literal(x) => Ok(*x),
+        Expr::Literal(x) => Ok(x.clone()),
         Expr::Lt(a, b) => Ok(Literal::Bool({
             let left = eval_expr(a, vars, funcs)?;
             let right = eval_expr(b, vars, funcs)?;
@@ -69,7 +69,9 @@ fn eval_expr<'a>(
         Expr::Neg(a) => match eval_expr(a, vars, funcs)? {
             Literal::Num(x) => Ok(Literal::Num(-x)),
             Literal::Bool(x) => Ok(Literal::Bool(!x)),
-            Literal::Null => Ok(Literal::Null),
+            Literal::Str(_) => Err("Cannot apply negation on string".to_string()),
+            Literal::Fn(_) => Err("Cannot apply negation on function".to_string()),
+            Literal::Null => Err("Cannot apply negation on null".to_string()),
         },
         Expr::Add(a, b) => Ok(Literal::Num({
             let left = eval_expr(a, vars, funcs)?;
@@ -95,7 +97,7 @@ fn eval_expr<'a>(
             // Searches the variable on variables symbol table that matches name with invoked variable
             let search_var = |name| vars.iter().rev().find(|(var, _)| var == name);
             if let Some((_, value)) = search_var(name) {
-                Ok(*value)
+                Ok(value.clone())
             } else {
                 Err(format!("Cannot find variable `{}` in scope", name))
             }
@@ -151,7 +153,7 @@ fn eval<'a>(
                 // Evaluates RHS first
                 let rhs = eval_expr(&rhs, vars, funcs)?;
                 // Pushes name into variable symbol table
-                vars.push((name.clone(), rhs));
+                vars.push((name.clone(), rhs.clone()));
                 rhs
             }
             Statement::Null => Literal::Null,

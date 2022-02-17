@@ -1,7 +1,7 @@
 //! The AST for the parser to use
 
 /// Return values for ZECA.
-#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub enum Literal {
     /// Unit types ([`()`]) but tuples are not yet implemented.
     Null,
@@ -9,10 +9,10 @@ pub enum Literal {
     Num(Number),
     /// Boolean value.
     Bool(bool),
-    // TODO
-    // Str(String),
-    // TODO para fazer cidadãs de primeira classe
-    // Fn
+    /// String value
+    Str(String),
+    /// Function variables
+    Fn(Function),
 }
 
 /// Types for ZECA's expressions. Uses mostly native Rust types
@@ -79,6 +79,18 @@ pub struct Function {
     pub args: Vec<String>,
     /// Function body, a block of statements.
     pub body: Box<Block>,
+}
+
+impl PartialEq for Function {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl PartialOrd for Function {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.name.partial_cmp(&other.name)
+    }
 }
 
 /// Top-level constructs. Declared "with no indentation".

@@ -25,6 +25,7 @@ pub fn comment_parser() -> impl Parser<char, (), Error = Simple<char>> + Clone +
     single_block_comment.or(inline_comment)
 }
 
+// TODO[epic-unicode] Update to support unicode XID.
 /// Parses identifiers (variable/function names), defined as per [`chumsky::text::ident()`].
 pub fn identifier_parser(
 ) -> impl Parser<char, <char as Character>::Collection, Error = Simple<char>> + Copy + Clone {
@@ -41,7 +42,7 @@ pub fn integer_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy 
 }
 
 /// Parses a floating-point number.
-/// TODO scientific notation.
+/// TODO[epic-scientific-notation] parse scientific notation.
 pub fn float_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     // Try to match a integer, then a dot, then another series of digits
     text::int::<_, Simple<char>>(10)
@@ -84,8 +85,8 @@ pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
 
 /// A statement is a component of a block, which is in turn a component of an outer expression or function.
 pub fn statement_parser() -> impl Parser<char, Statement, Error = Simple<char>> + Clone {
-    // TODO empty statement `;`. Map it to Statement::Null
     let identifier = identifier_parser();
+    // TODO nested items
     // let item = item_parser().map(|s| Statement::Item(Box::new(s)));
     let expr = expr_parser();
     let r#let = text::keyword("let")
@@ -97,9 +98,14 @@ pub fn statement_parser() -> impl Parser<char, Statement, Error = Simple<char>> 
             rhs: Box::new(rhs),
         });
     r#let
-        // .or(item) // FIXME can't declare nested functions
+        // .or(item)
         .or(expr.map(|s| Statement::Expr(s)))
+        .or_not()
         .then_ignore(just(";"))
+        .map(|s| match s {
+            Some(x) => x,
+            None => Statement::Null,
+        })
 }
 
 /// Parses a
