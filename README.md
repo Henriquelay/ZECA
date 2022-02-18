@@ -15,6 +15,7 @@ A Rust -> LLVM compiler written in Rust using [Chumsky] library.
 ## Using the compiler
 
 It is possible to build the project in several ways:
+
 ### Without installation
 
 While in any folder within the project, run:
