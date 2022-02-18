@@ -11,8 +11,8 @@
 mod unittest;
 
 pub mod parser;
-use chumsky::{prelude::end, Parser};
-use parser::{ast::*, parser};
+use chumsky::{prelude::end, Parser, text::TextParser};
+use parser::{ast::*};
 
 macro_rules! for_every_number_Value {
     ($expr:expr, $clj:expr) => {
@@ -42,7 +42,7 @@ macro_rules! for_every_number_Value_wrapped {
     };
 }
 
-/// Evaluates return value.
+/// Evaluates return value
 fn eval_expr<'a>(
     expr: &'a Expr,
     // TODO(optimization) replace both symbol list with actual symbol tables, not lists
@@ -135,7 +135,7 @@ fn eval_expr<'a>(
     }
 }
 
-/// Evaluates return value.
+/// Evaluates return value for block
 fn eval<'a>(
     blk: &'a Block,
     // TODO(optimization) replace both symbol list with actual symbol tables, not lists
@@ -146,6 +146,7 @@ fn eval<'a>(
     for statement in blk.0.clone() {
         last_statement = Some(match statement {
             Statement::Expr(expr) => eval_expr(&expr, vars, funcs)?,
+            Statement::Block(blk) => eval(&blk, vars, funcs)?,
             Statement::Item(item) => match item {
                 _ => todo!(),
             },
@@ -162,9 +163,9 @@ fn eval<'a>(
     Ok(last_statement.unwrap())
 }
 
-/// Evaluates source string using [`parser()`].
+/// Evaluates source string using [`parser!()`]
 pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
-    match parser().then_ignore(end()).parse_recovery_verbose(src) {
+    match parser!().then_ignore(end()).parse_recovery_verbose(src) {
         // Extract `main()` function
         (Some(ast), _) => {
             if let Some(Item::Function(main)) = ast.iter().find(|&item| match item {

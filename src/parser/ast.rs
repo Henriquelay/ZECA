@@ -1,13 +1,13 @@
 //! The AST for the parser to use
 
-/// Return values for ZECA.
+/// Return values for ZECA
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub enum Literal {
-    /// Unit types ([`()`]) but tuples are not yet implemented.
+    /// Unit types ([`()`]) but tuples are not yet implemented
     Null,
-    /// Numbers.
+    /// Numbers
     Num(Number),
-    /// Boolean value.
+    /// Boolean value
     Bool(bool),
     /// String value
     Str(String),
@@ -18,42 +18,42 @@ pub enum Literal {
 /// Types for ZECA's expressions. Uses mostly native Rust types
 #[derive(Debug, Clone)]
 pub enum Expr {
-    /// Literals values used within `Expr`s , e.g **1** + **1**.
+    /// Literals values used within `Expr`s , e.g **1** + **1**
     Literal(Literal),
 
-    /// Negation expression. Both things like `-1` and `!true`.
+    /// Negation expression. Both things like `-1` and `!true`
     Neg(Box<Expr>),
 
-    /// Binary +.
+    /// Binary +
     Add(Box<Expr>, Box<Expr>),
-    /// Binary -.
+    /// Binary -
     Sub(Box<Expr>, Box<Expr>),
-    /// Binary *.
+    /// Binary *
     Mul(Box<Expr>, Box<Expr>),
-    /// Binary /.
+    /// Binary /
     Div(Box<Expr>, Box<Expr>),
 
-    /// Expr1 < Expr2.
+    /// Expr1 < Expr2
     Lt(Box<Expr>, Box<Expr>),
-    /// Expr1 > Expr2.
+    /// Expr1 > Expr2
     Gt(Box<Expr>, Box<Expr>),
-    /// Expr1 == Expr2.
+    /// Expr1 == Expr2
     Eq(Box<Expr>, Box<Expr>),
 
-    /// Function call expression. `()` operator placed after a symbol, as in `foo()`.
+    /// Function call expression. `()` operator placed after a symbol, as in `foo()`
     Call(String, Vec<Expr>),
-    /// Variable invocation.
+    /// Variable invocation
     Var(String),
 }
 
 /// Types for ZECA's expressions. Uses mostly native Rust types
 #[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
 pub enum Number {
-    /// Fake numbers. -1, 0, 1.
+    /// Fake numbers. -1, 0, 1
     Integer(isize),
-    /// Unsigned integer numbers. 0, 1, 2.
+    /// Unsigned integer numbers. 0, 1, 2
     UInteger(usize),
-    /// Real numbers.
+    /// Real numbers
     Float(f64),
 }
 
@@ -70,15 +70,15 @@ impl std::ops::Neg for Number {
     }
 }
 
-/// A function declaration.
+/// A function declaration
 #[derive(Debug, Clone)]
 pub struct Function {
     /// Function name symbol
     pub name: String,
     // TODO argument typing
-    /// List of function argument names.
+    /// List of function argument names
     pub args: Vec<String>,
-    /// Function body, a block of statements.
+    /// Function body, a block of statements
     pub body: Box<Block>,
 }
 
@@ -94,31 +94,33 @@ impl PartialOrd for Function {
     }
 }
 
-/// Top-level constructs. Declared "with no indentation".
+/// Top-level constructs. Declared "with no indentation"
 #[derive(Debug, Clone)]
 pub enum Item {
     /// A function declaration
     Function(Function),
 }
 
-/// A statement. Can be wither a Block or a StatementWithoutBlock.
+/// A statement is a component of a block, which is in turn a component of an outer expression or function
 #[derive(Debug, Clone)]
 pub enum Statement {
-    /// A null statement (contains only `;`).
+    /// A null statement (contains only `;`)
     Null,
-    /// A item construct. Those can be placed wherever a statement can.
+    /// A item construct. Those can be placed wherever a statement can
     Item(Box<Item>),
-    /// Variable declaration.
+    /// Variable declaration
     Let {
-        /// Name defined to this symbol.
+        /// Name defined to this symbol
         name: String,
-        /// Value to be assigned to symbol.
+        /// Value to be assigned to symbol
         rhs: Box<Expr>,
     },
-    /// Expression (includes call and invoking).
-    Expr(Expr),
+    /// Expression (includes call and invoking)
+    Expr(Box<Expr>),
+    /// A Block statement
+    Block(Box<Block>),
 }
 
-/// A Statement Block. Simply a list of sequential statements.
+/// A Statement Block. Simply a list of sequential statements
 #[derive(Debug, Clone)]
 pub struct Block(pub Vec<Statement>);

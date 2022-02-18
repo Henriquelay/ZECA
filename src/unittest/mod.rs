@@ -80,11 +80,7 @@ pub fn bool() {
         },
         vec!["false", "true"],
         vec![
-            "flase", 
-            "treu", 
-            " ", 
-            "t", "r", "u", "e", 
-            "f", "a", "l", "s", "e",
+            "flase", "treu", " ", "t", "r", "u", "e", "f", "a", "l", "s", "e",
         ],
     );
 }
@@ -271,7 +267,7 @@ pub fn expr() {
             "+",
             "/",
             "*",
-            "1 === 1"
+            "1 === 1",
         ],
     )
 }
@@ -280,17 +276,18 @@ pub fn expr() {
 pub fn item() {
     test_util::tests(
         |s| {
-            crate::parser::item_parser()
+            crate::parser::statement_block_item_parser()
+                .2
                 .then_ignore(end())
                 .parse_recovery_verbose(s)
         },
         vec![
             "fn identifier() {}",
-            "fn identifier() {body}",
+            "fn identifier() {body;}",
             "fn identifier(args) {}",
-            "fn identifier(args) {body}",
+            "fn identifier(args) {body;}",
             "fn identifier(arg) {
-                arg
+                arg;
             }",
             "fn identifier(arg1, arg2) {
                 arg1 + arg2;
@@ -319,7 +316,8 @@ pub fn item() {
 pub fn statement() {
     test_util::tests(
         |s| {
-            crate::parser::statement_parser()
+            crate::parser::statement_block_item_parser()
+                .0
                 .then_ignore(end())
                 .parse_recovery_verbose(s)
         },
@@ -343,16 +341,29 @@ pub fn statement() {
 pub fn block() {
     test_util::tests(
         |s| {
-            crate::parser::block_parser()
+            crate::parser::statement_block_item_parser()
+                .1
                 .then_ignore(end())
                 .parse_recovery_verbose(s)
         },
         vec![
             "{}",
-            "{{}}", // Será
+            "{{}}",
+            "{;}",
+            "{;;;;;}",
+            "{{;}}",
+            "{{;};}",
+            "{{};}",
+            "{{;;;;};;;;;}",
             "{add(x);}",
             "{
                 add(x);
+            }",
+            "{
+                // comentão
+                add(x);
+
+                // Comentão denovo
             }",
             "{
                 add(x);
