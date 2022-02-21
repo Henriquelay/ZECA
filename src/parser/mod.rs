@@ -116,9 +116,9 @@ pub fn statement_block_item_parser() -> (
         .then_ignore(just('='))
         .then(expr.clone())
         .then_ignore(just(";"))
-        .map(|(name, rhs)| Statement::Let {
-            name,
-            rhs: Box::new(rhs),
+        .map(|(lvalue, rvalue)| Statement::Let {
+            lvalue,
+            rvalue: Box::new(rvalue),
         });
 
     let mut block = None;

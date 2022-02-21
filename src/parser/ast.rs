@@ -111,9 +111,9 @@ pub enum Statement {
     /// Variable declaration
     Let {
         /// Name defined to this symbol
-        name: String,
+        lvalue: String,
         /// Value to be assigned to symbol
-        rhs: Box<Expr>,
+        rvalue: Box<Expr>,
     },
     /// Expression (includes call and invoking)
     Expr(Box<Expr>),

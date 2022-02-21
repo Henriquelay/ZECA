@@ -150,12 +150,12 @@ fn eval<'a>(
             Statement::Item(item) => match item {
                 _ => todo!(),
             },
-            Statement::Let { name, rhs } => {
+            Statement::Let { lvalue: name, rvalue } => {
                 // Evaluates RHS first
-                let rhs = eval_expr(&rhs, vars, funcs)?;
+                let rvalue = eval_expr(&rvalue, vars, funcs)?;
                 // Pushes name into variable symbol table
-                vars.push((name.clone(), rhs.clone()));
-                rhs
+                vars.push((name.clone(), rvalue.clone()));
+                rvalue
             }
             Statement::Null => Literal::Null,
         })
