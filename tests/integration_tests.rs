@@ -60,17 +60,16 @@ fn conditional() {
     assert!(expected_value == val);
 }
 
-#[ignore]
 #[test]
 fn all_features() {
-    let expected_value = 6.;
+    let expected_value = 5;
     let delta = 1e-10;
-    let val = parse_file("tests/examples/good/all_features.zeca");
+    let val = parse_file("tests/examples/good/full_test_1.zeca");
     let val = match val {
-        Literal::Num(Number::Float(x)) => x,
-        _ => panic!("Returned value is not a Literal::Num(Number::Float())"),
+        Literal::Num(Number::Integer(x)) => x,
+        _ => panic!(),
     };
-    assert!(f64::abs(val - expected_value) < delta);
+    assert!(expected_value == val);
 }
 
 #[test]

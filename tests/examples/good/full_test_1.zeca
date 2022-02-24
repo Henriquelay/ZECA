@@ -1,0 +1,23 @@
+// WIP
+// Tests most ZECA features (part 1) (including comments)
+
+/* Returns the absolute value of a integer
+ * AKA flip the sign if integer is negative
+ */
+fn absolute_value (x) {
+    if (x < 0) {
+        x = -x;
+    }
+}
+
+fn add (x, y) {
+    x + y;
+}
+
+fn main() {
+    let x = -5;
+
+    if (x < 10) {
+        x = absolute_value(x);
+    }
+}
