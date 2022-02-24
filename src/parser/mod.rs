@@ -76,9 +76,8 @@ pub fn boolean_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy 
 /// Parses the string type. Does not support escaping
 pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     just('"')
-        .ignore_then(take_until(just('"')))
-        // .collect::<String>()
-        .map(|_| Expr::Literal(Literal::Bool(true)))
+        .ignore_then(take_until(just('"').ignored()))
+        .map(|(s, _)| Expr::Literal(Literal::Str(s.iter().collect())))
 }
 
 // }
@@ -180,7 +179,8 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
             )
             .map(|(f, args)| Expr::Call(f, args));
 
-        let atom = expr.delimited_by(just('('), just(')'))
+        let atom = expr
+            .delimited_by(just('('), just(')'))
             .or(string)
             .or(boolean)
             .or(number)
