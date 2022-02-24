@@ -125,6 +125,7 @@ pub fn statement_block_item_parser() -> (
     let statement = recursive(|statement| {
         let block_inner = statement
             .padded_by(comment.padded().repeated())
+            .padded()
             .repeated()
             .padded()
             .map(|s| Block(s))
@@ -148,13 +149,11 @@ pub fn statement_block_item_parser() -> (
         item = Some(item_inner.clone());
 
         r#let
-            .or(item_inner.map(|s| Statement::Item(Box::new(s))))
-            .or(block_inner
-                .map(|s| Statement::Block(Box::new(s)))
-                .then_ignore(just(";").or_not()))
             .or(expr
                 .map(|s| Statement::Expr(Box::new(s)))
                 .then_ignore(just(";")))
+            .or(item_inner.map(|s| Statement::Item(Box::new(s))))
+            .or(block_inner.map(|s| Statement::Block(Box::new(s))))
             .or(just(";").map(|_| Statement::Null))
     });
 

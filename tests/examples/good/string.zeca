@@ -5,5 +5,5 @@ fn main() {
     /* some 
     comments */
     
-    h = "henrique, atílio e luana";
+    "henrique, atílio e luana";
 }
