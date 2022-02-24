@@ -1,8 +1,10 @@
-let x = true;
+fn main() {
+    let x = true;
 
-if (x && !x) {
-    x = false;
-}
-else {
-    x = true;
+    if (x && -x) {
+        x = false;
+    }
+    else {
+        x = true;
+    }
 }

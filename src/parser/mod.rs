@@ -110,14 +110,24 @@ pub fn statement_block_item_parser() -> (
     let identifier = identifier_parser();
     let comment = comment_parser();
     let expr = expr_parser();
-    let r#let = text::keyword("let")
-        .ignore_then(identifier)
+
+    let assign = identifier
         .then_ignore(just('='))
         .then(expr.clone())
         .then_ignore(just(";"))
-        .map(|(lvalue, rvalue)| Statement::Let {
+        .map(|(lvalue, rvalue)| Statement::Assign {
             lvalue,
             rvalue: Box::new(rvalue),
+        });
+    let r#let = text::keyword("let")
+        .ignored()
+        .then(assign.clone())
+        .map(|(_, statement)| {
+            if let Statement::Assign { lvalue, rvalue } = statement {
+                Statement::Let { lvalue, rvalue }
+            } else {
+                unreachable!()
+            }
         });
 
     let mut block = None;
@@ -164,10 +174,15 @@ pub fn statement_block_item_parser() -> (
                 } else {
                     None
                 };
-                Statement::Conditional(Box::new(expr), Box::new(ifblock), elseblock_wrapped)
+                Statement::Conditional {
+                    r#if: Box::new(expr),
+                    r#then: Box::new(ifblock),
+                    r#else: elseblock_wrapped,
+                }
             });
 
         r#let
+            .or(assign)
             .or(expr
                 .map(|s| Statement::Expr(Box::new(s)))
                 .then_ignore(just(";")))

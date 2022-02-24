@@ -11,6 +11,7 @@
 mod unittest;
 
 pub mod parser;
+
 use chumsky::{prelude::end, text::TextParser, Parser};
 use parser::ast::*;
 
@@ -162,7 +163,11 @@ fn eval<'a>(
             Statement::Item(item) => match item {
                 _ => todo!(),
             },
-            Statement::Conditional(r#if, r#then, r#else) => {
+            Statement::Conditional {
+                r#if,
+                r#then,
+                r#else,
+            } => {
                 if let Literal::Bool(cond) = eval_expr(&r#if, vars, funcs)? {
                     if cond {
                         Ok(eval(&r#then, vars, funcs)?)
@@ -179,15 +184,22 @@ fn eval<'a>(
                     ))
                 }
             }
-            Statement::Let {
-                lvalue: name,
-                rvalue,
-            } => {
+            Statement::Let { lvalue, rvalue } => {
                 // Evaluates RHS first
                 let rvalue = eval_expr(&rvalue, vars, funcs)?;
                 // Pushes name into variable symbol table
-                vars.push((name.clone(), rvalue.clone()));
+                vars.push((lvalue.clone(), rvalue.clone()));
                 Ok(rvalue)
+            }
+            Statement::Assign { lvalue, rvalue } => {
+                let new_value = eval_expr(&rvalue, vars, funcs)?;
+                // Try to find lvalue
+                let mut _old_value = & vars
+                    .iter_mut()
+                    .find(|(name, _)| name == &lvalue)
+                    .expect("Assignment lvalue not found").1;
+                _old_value = &new_value.clone();
+                Ok(new_value)
             }
             Statement::Null => Ok(Literal::Null),
         })

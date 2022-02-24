@@ -113,9 +113,23 @@ pub enum Statement {
     /// A item construct. Those can be placed wherever a statement can
     Item(Box<Item>),
     /// Conditional execution. It Expr is true, executes first block, else executes second block
-    Conditional(Box<Expr>, Box<Block>, Option<Box<Block>>),
+    Conditional {
+        /// The expression to check for it will jump or not
+        r#if: Box<Expr>,
+        /// Jumps to this if `r#if`[Statement::Conditional.r#if] is true
+        r#then: Box<Block>,
+        /// Jumps to this if `r#if`[Statement::Conditional.r#if] is false. Is also optional, and will keep execution as normal if field is `None`
+        r#else: Option<Box<Block>>,
+    },
     /// Variable declaration
     Let {
+        /// Name defined to this symbol
+        lvalue: String,
+        /// Value to be assigned to symbol
+        rvalue: Box<Expr>,
+    },
+    /// Variable assignment
+    Assign {
         /// Name defined to this symbol
         lvalue: String,
         /// Value to be assigned to symbol

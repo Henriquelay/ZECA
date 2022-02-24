@@ -96,18 +96,16 @@ fn string() {
     assert!(val == expected_value);
 }
 
-// #[ignore]
-// #[test]
-// fn bool() {
-//     let expected_value = false;
-//     let delta = 1e-10;
-//     let val = parse_file("tests/examples/good/bool.zeca");
-//     let val = match val {
-//         Literal::Num(Number::Float(x)) => x,
-//         _ => panic!(),
-//     };
-//     assert!(f64::abs(val - expected_value) < delta);
-// }
+#[test]
+fn bool() {
+    let expected_value = true;
+    let val = parse_file("tests/examples/good/bool.zeca");
+    let val = match val {
+        Literal::Bool(x) => x,
+        _ => panic!("Value is not a boolean"),
+    };
+    assert!(expected_value == val);
+}
 
 // #[ignore]
 // #[test]
