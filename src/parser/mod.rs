@@ -180,10 +180,10 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
             )
             .map(|(f, args)| Expr::Call(f, args));
 
-        let atom = number
+        let atom = expr.delimited_by(just('('), just(')'))
             .or(string)
             .or(boolean)
-            .or(expr.delimited_by(just('('), just(')')))
+            .or(number)
             .or(call)
             .or(identifier.map(Expr::Var));
 
