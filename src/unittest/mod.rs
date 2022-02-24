@@ -224,10 +224,13 @@ pub fn expr() {
                 .parse_recovery(s)
         },
         vec![
+            // Literals
             "1",
+            // Neg
             "-1",
-            "-1-1",
+            // Simple math
             "1 + 1",
+            "-1-1",
             "1-1",
             "1 * 1",
             "1 / 1",
@@ -235,7 +238,9 @@ pub fn expr() {
             "1 - 1 / 1 - 1",
             "- 1 - 1 / 1 - 1",
             "1 > -1",
+            // TODO +1
             // "+1", // Será
+            // Comparation
             // "-1 < +1",
             "-1 < 1",
             "-1 < 1",
@@ -246,7 +251,15 @@ pub fn expr() {
             "- 1 *  -4 == 4 / 1",
             "- - 1",
             "--1",
-            r#""str ainda estão dentro de expr.""#,
+            // Bool algebra
+            "true",
+            "false",
+            "true && true",
+            "false && true",
+            "1 && 0",
+            "5 || -3",
+            // Str
+            r#""str são literals e portanto ainda estão dentro de expr.""#,
         ],
         vec![
             "1+",

@@ -227,7 +227,18 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
             )
             .foldl(|lhs, (op, rhs)| op(Box::new(lhs), Box::new(rhs)));
 
-        comparation.padded()
+        let bool_algebra = comparation
+            .clone()
+            .then(
+                op("&&")
+                    .to(Expr::And as fn(_, _) -> _)
+                    .or(op("||").to(Expr::Or as fn(_, _) -> _))
+                    .then(comparation)
+                    .repeated(),
+            )
+            .foldl(|lhs, (op, rhs)| op(Box::new(lhs), Box::new(rhs)));
+
+        bool_algebra.padded()
     })
 }
 // }

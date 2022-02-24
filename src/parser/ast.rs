@@ -39,6 +39,10 @@ pub enum Expr {
     Gt(Box<Expr>, Box<Expr>),
     /// Expr1 == Expr2
     Eq(Box<Expr>, Box<Expr>),
+    /// Expr1 && Expr2. >0 is truthy
+    And(Box<Expr>, Box<Expr>),
+    /// Expr1 || Expr2. >0 is truthy
+    Or(Box<Expr>, Box<Expr>),
 
     /// Function call expression. `()` operator placed after a symbol, as in `foo()`
     Call(String, Vec<Expr>),
@@ -108,6 +112,8 @@ pub enum Statement {
     Null,
     /// A item construct. Those can be placed wherever a statement can
     Item(Box<Item>),
+    /// Conditional execution. It Expr is true, executes first block, else executes second block
+    Conditional(Box<Expr>, Box<Block>, Box<Block>),
     /// Variable declaration
     Let {
         /// Name defined to this symbol

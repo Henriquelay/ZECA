@@ -11,8 +11,8 @@
 mod unittest;
 
 pub mod parser;
-use chumsky::{prelude::end, Parser, text::TextParser};
-use parser::{ast::*};
+use chumsky::{prelude::end, text::TextParser, Parser};
+use parser::ast::*;
 
 macro_rules! for_every_number_Value {
     ($expr:expr, $clj:expr) => {
@@ -45,7 +45,7 @@ macro_rules! for_every_number_Value_wrapped {
 /// Evaluates return value
 fn eval_expr<'a>(
     expr: &'a Expr,
-    // TODO(optimization) replace both symbol list with actual symbol tables, not lists
+    // TODO replace both symbol list with actual symbol tables, not lists
     vars: &mut Vec<(String, Literal)>,
     funcs: &Vec<Function>,
 ) -> Result<Literal, String> {
@@ -69,9 +69,21 @@ fn eval_expr<'a>(
         Expr::Neg(a) => match eval_expr(a, vars, funcs)? {
             Literal::Num(x) => Ok(Literal::Num(-x)),
             Literal::Bool(x) => Ok(Literal::Bool(!x)),
-            Literal::Str(_) => Err("Cannot apply negation on string".to_string()),
-            Literal::Fn(_) => Err("Cannot apply negation on function".to_string()),
-            Literal::Null => Err("Cannot apply negation on null".to_string()),
+            _ => Err(format!("Cannot apply negation")),
+        },
+        Expr::And(a, b) => match (eval_expr(a, vars, funcs)?, eval_expr(b, vars, funcs)?) {
+            (Literal::Num(x), Literal::Num(y)) => Ok(Literal::Bool(
+                x > Number::UInteger(1) && y > Number::UInteger(1),
+            )),
+            (Literal::Bool(x), Literal::Bool(y)) => Ok(Literal::Bool(x && y)),
+            _ => Err(format!("Cannot apply AND")),
+        },
+        Expr::Or(a, b) => match (eval_expr(a, vars, funcs)?, eval_expr(b, vars, funcs)?) {
+            (Literal::Num(x), Literal::Num(y)) => Ok(Literal::Bool(
+                x > Number::UInteger(1) || y > Number::UInteger(1),
+            )),
+            (Literal::Bool(x), Literal::Bool(y)) => Ok(Literal::Bool(x || y)),
+            _ => Err(format!("Cannot apply OR")),
         },
         Expr::Add(a, b) => Ok(Literal::Num({
             let left = eval_expr(a, vars, funcs)?;
@@ -138,29 +150,45 @@ fn eval_expr<'a>(
 /// Evaluates return value for block
 fn eval<'a>(
     blk: &'a Block,
-    // TODO(optimization) replace both symbol list with actual symbol tables, not lists
+    // TODO replace both symbol list with actual symbol tables, not lists
     vars: &mut Vec<(String, Literal)>,
     funcs: &Vec<Function>,
 ) -> Result<Literal, String> {
     let mut last_statement = None;
     for statement in blk.0.clone() {
         last_statement = Some(match statement {
-            Statement::Expr(expr) => eval_expr(&expr, vars, funcs)?,
-            Statement::Block(blk) => eval(&blk, vars, funcs)?,
+            Statement::Expr(expr) => Ok(eval_expr(&expr, vars, funcs)?),
+            Statement::Block(blk) => Ok(eval(&blk, vars, funcs)?),
             Statement::Item(item) => match item {
                 _ => todo!(),
             },
-            Statement::Let { lvalue: name, rvalue } => {
+            Statement::Conditional(r#if, r#then, r#else) => {
+                if let Literal::Bool(cond) = eval_expr(&r#if, vars, funcs)? {
+                    if cond {
+                        Ok(eval(&r#then, vars, funcs)?)
+                    } else {
+                        Ok(eval(&r#else, vars, funcs)?)
+                    }
+                } else {
+                    Err(format!(
+                        "Conditional's condition is not a boolean expression"
+                    ))
+                }
+            }
+            Statement::Let {
+                lvalue: name,
+                rvalue,
+            } => {
                 // Evaluates RHS first
                 let rvalue = eval_expr(&rvalue, vars, funcs)?;
                 // Pushes name into variable symbol table
                 vars.push((name.clone(), rvalue.clone()));
-                rvalue
+                Ok(rvalue)
             }
-            Statement::Null => Literal::Null,
+            Statement::Null => Ok(Literal::Null),
         })
     }
-    Ok(last_statement.unwrap())
+    Ok(last_statement.unwrap().unwrap())
 }
 
 /// Evaluates source string using [`parser!()`]
