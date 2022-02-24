@@ -148,10 +148,30 @@ pub fn statement_block_item_parser() -> (
         let item_inner = function;
         item = Some(item_inner.clone());
 
+        let conditional = text::keyword("if")
+            .padded()
+            .ignore_then(expr.clone())
+            .then(block_inner.clone())
+            .then(
+                text::keyword("else")
+                    .padded()
+                    .ignore_then(block_inner.clone())
+                    .or_not(),
+            )
+            .map(|((expr, ifblock), elseblock)| {
+                let elseblock_wrapped = if let Some(elseblock_unwrap) = elseblock {
+                    Some(Box::new(elseblock_unwrap))
+                } else {
+                    None
+                };
+                Statement::Conditional(Box::new(expr), Box::new(ifblock), elseblock_wrapped)
+            });
+
         r#let
             .or(expr
                 .map(|s| Statement::Expr(Box::new(s)))
                 .then_ignore(just(";")))
+            .or(conditional)
             .or(item_inner.map(|s| Statement::Item(Box::new(s))))
             .or(block_inner.map(|s| Statement::Block(Box::new(s))))
             .or(just(";").map(|_| Statement::Null))

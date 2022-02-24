@@ -344,8 +344,16 @@ pub fn statement() {
             "let x = 1 + 2;",
             "let x = 1 - 1;",
             "let x = - 1 + 1;",
+            "if true {true;}",
+            "if true {}",
+            "if true {true;} else {false;}",
+            "if true {true;} else {}",
+            "if add(x, y) {}",
+            "if add(x, y) - 5 / 3 {}",
+            r#"if "string" {}"#, // This is sintatically valid but will occur in a runtime error
+            r#"if "string" {} else {false;}"#, // This is sintatically valid but will occur in a runtime error
         ],
-        vec!["12", r#""Termina sem ;""#],
+        vec!["12", r#""Termina sem ;""#, "if 0121 {}"],
     );
 }
 
@@ -412,25 +420,6 @@ pub fn r#loop() {
             "{{}}",
 
         ],
-    ); */
-}
-
-#[test]
-#[ignore]
-pub fn conditional() {
-    /*     test_util::tests(
-        |s| {
-            crate::parser::conditional_parser()
-                .then_ignore(end())
-                .parse_recovery_verbose(s)
-        },
-        vec![
-            "if (true) {{}}",
-            "if (false) {{}}",
-            "if (true) {{}} else {{}}",
-            "if (cond) {{}} else {{}}",
-        ],
-        vec!["else {}", "if", "if (cond)"],
     ); */
 }
 

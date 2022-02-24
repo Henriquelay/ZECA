@@ -113,7 +113,7 @@ pub enum Statement {
     /// A item construct. Those can be placed wherever a statement can
     Item(Box<Item>),
     /// Conditional execution. It Expr is true, executes first block, else executes second block
-    Conditional(Box<Expr>, Box<Block>, Box<Block>),
+    Conditional(Box<Expr>, Box<Block>, Option<Box<Block>>),
     /// Variable declaration
     Let {
         /// Name defined to this symbol

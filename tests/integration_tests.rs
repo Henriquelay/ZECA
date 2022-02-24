@@ -49,17 +49,15 @@ fn fn_loop() {
     assert!(f64::abs(val - expected_value) < delta);
 }
 
-#[ignore]
 #[test]
 fn conditional() {
-    let expected_value = 1.;
-    let delta = 1e-10;
+    let expected_value = -1;
     let val = parse_file("tests/examples/good/conditional.zeca");
     let val = match val {
-        Literal::Num(Number::Float(x)) => x,
-        _ => panic!(),
+        Literal::Num(Number::Integer(x)) => x,
+        _ => panic!("Expected value is not Integer type"),
     };
-    assert!(f64::abs(val - expected_value) < delta);
+    assert!(expected_value == val);
 }
 
 #[ignore]

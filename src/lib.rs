@@ -167,7 +167,11 @@ fn eval<'a>(
                     if cond {
                         Ok(eval(&r#then, vars, funcs)?)
                     } else {
-                        Ok(eval(&r#else, vars, funcs)?)
+                        if let Some(r#else) = r#else {
+                            Ok(eval(&r#else, vars, funcs)?)
+                        } else {
+                            Ok(Literal::Null)
+                        }
                     }
                 } else {
                     Err(format!(
