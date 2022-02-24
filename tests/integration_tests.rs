@@ -61,9 +61,8 @@ fn conditional() {
 }
 
 #[test]
-fn all_features() {
+fn full_test_1() {
     let expected_value = 5;
-    let delta = 1e-10;
     let val = parse_file("tests/examples/good/full_test_1.zeca");
     let val = match val {
         Literal::Num(Number::Integer(x)) => x,
