@@ -11,7 +11,6 @@ where
     parsed.unwrap()
 }
 
-// FIXME block need to return eval of last element
 #[test]
 fn simple() {
     let expected_value = 13.06;
@@ -19,7 +18,7 @@ fn simple() {
     let val = parse_file("tests/examples/good/simple.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
-        _ => panic!(),
+        _ => panic!("Returned value is not a Literal::Num(Number::Float())"),
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
@@ -32,7 +31,7 @@ fn negation() {
     let val = parse_file("tests/examples/good/neg.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
-        _ => panic!(),
+        _ => panic!("Returned value is not a Literal::Num(Number::Float())"),
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
@@ -71,7 +70,7 @@ fn all_features() {
     let val = parse_file("tests/examples/good/all_features.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
-        _ => panic!(),
+        _ => panic!("Returned value is not a Literal::Num(Number::Float())"),
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
@@ -83,7 +82,7 @@ fn expr_simple() {
     let val = parse_file("tests/examples/good/expr_simple.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
-        _ => panic!(),
+        _ => panic!("Returned value is not a Literal::Num(Number::Float())"),
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
@@ -94,7 +93,7 @@ fn string() {
     let val = parse_file("tests/examples/good/string.zeca");
     let val = match val {
         Literal::Str(x) => x,
-        _ => panic!(),
+        _ => panic!("Returned value is not a string"),
     };
     assert!(val == expected_value);
 }
