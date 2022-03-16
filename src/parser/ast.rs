@@ -13,6 +13,8 @@ pub enum Literal {
     Str(String),
     /// Function variables
     Fn(Function),
+    /// Break special value
+    Break,
 }
 
 /// Types for ZECA's expressions. Uses mostly native Rust types
@@ -110,6 +112,8 @@ pub enum Item {
 pub enum Statement {
     /// A null statement (contains only `;`)
     Null,
+    /// A Break statement. Breaks out of [Loop]s.
+    Break,
     /// A item construct. Those can be placed wherever a statement can
     Item(Box<Item>),
     /// Conditional execution. It Expr is true, executes first block, else executes second block
@@ -139,8 +143,14 @@ pub enum Statement {
     Expr(Box<Expr>),
     /// A Block statement
     Block(Box<Block>),
+    /// A Loop statement
+    Loop(Box<Loop>),
 }
 
 /// A Statement Block. Simply a list of sequential statements
 #[derive(Debug, Clone)]
 pub struct Block(pub Vec<Statement>);
+
+/// A Loop statement. Only contains a block.
+#[derive(Debug, Clone)]
+pub struct Loop(pub Box<Block>);

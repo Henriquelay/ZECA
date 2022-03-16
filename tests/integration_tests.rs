@@ -36,17 +36,41 @@ fn negation() {
     assert!(f64::abs(val - expected_value) < delta);
 }
 
-#[ignore]
 #[test]
-fn fn_loop() {
+fn assign() {
+    let expected_value = 10;
+    let val = parse_file("tests/examples/good/assign.zeca");
+    let val = match val {
+        Literal::Num(Number::Integer(x)) => x,
+        _ => panic!(),
+    };
+    assert!(val == expected_value);
+}
+
+#[test]
+#[ignore]
+fn loop_forever() {
+    // Make a timer for ~2secs ?
     let expected_value = 1.;
     let delta = 1e-10;
-    let val = parse_file("tests/examples/good/fn_loop.zeca");
+    let val = parse_file("tests/examples/good/loop.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
         _ => panic!(),
     };
     assert!(f64::abs(val - expected_value) < delta);
+}
+
+#[test]
+#[ignore]
+fn loop_breaks() {
+    let expected_value = 10;
+    let val = parse_file("tests/examples/good/loop.zeca");
+    let val = match val {
+        Literal::Num(Number::Integer(x)) => x,
+        _ => panic!(),
+    };
+    assert!(val == expected_value);
 }
 
 #[test]

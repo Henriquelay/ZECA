@@ -1,0 +1,9 @@
+fn main() {
+    let x = 0;
+    loop {
+        if x == 10 {
+            break;
+        }
+        x = x + 1;
+    }
+}

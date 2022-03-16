@@ -102,10 +102,14 @@ pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
 /// Differences from Rust:
 /// - Only supports function declarations
 /// - No support for nested functions
-pub fn statement_block_item_parser() -> (
+///
+/// A Loop is a controle structure to repeat determined Statements, or, more precisely, a Block.
+/// TODO does it had break implementation? Document it here.
+pub fn statement_block_item_loop_parser() -> (
     impl Parser<char, Statement, Error = Simple<char>> + Clone,
     impl Parser<char, Block, Error = Simple<char>> + Clone,
     impl Parser<char, Item, Error = Simple<char>> + Clone,
+    impl Parser<char, Loop, Error = Simple<char>> + Clone,
 ) {
     let identifier = identifier_parser();
     let comment = comment_parser();
@@ -132,14 +136,15 @@ pub fn statement_block_item_parser() -> (
 
     let mut block = None;
     let mut item = None;
+    let mut r#loop = None;
     let statement = recursive(|statement| {
-        let block_inner = statement
+        let block_content = statement
             .padded_by(comment.padded().repeated())
             .padded()
             .repeated()
             .padded()
-            .map(|s| Block(s))
-            .delimited_by(just("{"), just("}"));
+            .map(|s| Block(s));
+        let block_inner = block_content.clone().delimited_by(just("{"), just("}"));
         block = Some(block_inner.clone());
 
         let function = text::keyword("fn")
@@ -181,18 +186,26 @@ pub fn statement_block_item_parser() -> (
                 }
             });
 
+        let loop_inner = text::keyword("loop")
+            .padded()
+            .ignore_then(block_inner.clone())
+            .map(|s| Loop(Box::new(s)));
+        r#loop = Some(loop_inner.clone());
+
         r#let
             .or(assign)
             .or(expr
                 .map(|s| Statement::Expr(Box::new(s)))
                 .then_ignore(just(";")))
             .or(conditional)
+            .or(just("break").ignored().to(Statement::Break))
             .or(item_inner.map(|s| Statement::Item(Box::new(s))))
             .or(block_inner.map(|s| Statement::Block(Box::new(s))))
+            .or(loop_inner.map(|s| Statement::Loop(Box::new(s))))
             .or(just(";").map(|_| Statement::Null))
     });
 
-    (statement, block.unwrap(), item.unwrap())
+    (statement, block.unwrap(), item.unwrap(), r#loop.unwrap())
 }
 
 /// Parses expressions, made of `atom`s
@@ -285,7 +298,7 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
 #[macro_export]
 macro_rules! parser {
     () => {
-        crate::parser::statement_block_item_parser()
+        crate::parser::statement_block_item_loop_parser()
             .2
             .padded_by(crate::parser::comment_parser().padded().repeated())
             .repeated()

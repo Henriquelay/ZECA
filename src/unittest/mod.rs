@@ -289,7 +289,7 @@ pub fn expr() {
 pub fn item() {
     test_util::tests(
         |s| {
-            crate::parser::statement_block_item_parser()
+            crate::parser::statement_block_item_loop_parser()
                 .2
                 .then_ignore(end())
                 .parse_recovery_verbose(s)
@@ -329,7 +329,7 @@ pub fn item() {
 pub fn statement() {
     test_util::tests(
         |s| {
-            crate::parser::statement_block_item_parser()
+            crate::parser::statement_block_item_loop_parser()
                 .0
                 .then_ignore(end())
                 .parse_recovery_verbose(s)
@@ -362,7 +362,7 @@ pub fn statement() {
 pub fn block() {
     test_util::tests(
         |s| {
-            crate::parser::statement_block_item_parser()
+            crate::parser::statement_block_item_loop_parser()
                 .1
                 .then_ignore(end())
                 .parse_recovery_verbose(s)
@@ -398,29 +398,28 @@ pub fn block() {
 }
 
 #[test]
-#[ignore]
 pub fn r#loop() {
-    /*     test_util::tests(
+    test_util::tests(
         |s| {
-            crate::parser::loop_parser()
+            crate::parser::statement_block_item_loop_parser()
+                .3
                 .then_ignore(end())
                 .parse_recovery_verbose(s)
         },
         vec![
-            "loop {{}}",
-            "loop {{body}}",
-            "loop {{
+            "loop {}",
+            "loop {statement();}",
+            "loop {
+                body;
+                // break;
+            }",
+            "loop {
                 body;
                 break;
-            }}",
+            }",
         ],
-        vec![
-            "loop (cond) {{}}",
-            "loop",
-            "{{}}",
-
-        ],
-    ); */
+        vec!["loop (cond) {{}}", "loop", "{}"],
+    );
 }
 
 #[test]
