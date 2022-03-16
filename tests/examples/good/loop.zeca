@@ -1,10 +1,11 @@
 fn main() {
-    let x = 0;
+    let x = 1;
     loop {
-        if (x == 10) {
+        if x < 10 {
+            x = x + 1;
+        } else {
             break;
         }
-        x = x + 1;
     }
     x;
 }

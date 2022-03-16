@@ -74,7 +74,7 @@ fn loop_breaks() {
 
 #[test]
 fn conditional() {
-    let expected_value = -1;
+    let expected_value = 5;
     let val = parse_file("tests/examples/good/conditional.zeca");
     let val = match val {
         Literal::Num(Number::Integer(x)) => x,

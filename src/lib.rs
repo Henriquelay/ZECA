@@ -187,9 +187,7 @@ fn eval<'a>(
             }),
             Statement::Loop(r#loop) => match *r#loop {
                 Loop(blk) => Ok(loop {
-                    println!("Churusplangos");
                     if let Literal::Break = eval(&blk, vars, funcs, true)? {
-                        println!("Churusplingos");
                         break Literal::Null;
                     }
                 }),
@@ -202,9 +200,9 @@ fn eval<'a>(
             } => {
                 if let Literal::Bool(cond) = eval_expr(&r#if, vars, funcs)? {
                     if cond {
-                        Ok(eval(&r#then, vars, funcs, false)?)
+                        Ok(eval(&r#then, vars, funcs, is_loop)?)
                     } else if let Some(r#else) = r#else {
-                        Ok(eval(&r#else, vars, funcs, false)?)
+                        Ok(eval(&r#else, vars, funcs, is_loop)?)
                     } else {
                         Ok(Literal::Null)
                     }
@@ -252,7 +250,7 @@ pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
                     Item::Function(f) => funcs.insert(f.name.clone(), &f),
                 };
             }
-            // Searching for function called `main` 
+            // Searching for function called `main`
             if let Some(Item::Function(main)) = ast.iter().find(|&item| match item {
                 Item::Function(Function {
                     name,
@@ -267,7 +265,8 @@ pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
                 }
             } else {
                 Err(vec![
-                    "Syntax error: No function named `main` in top-level items. Can't continue.".to_string(),
+                    "Syntax error: No function named `main` in top-level items. Can't continue."
+                        .to_string(),
                 ])
             }
         }

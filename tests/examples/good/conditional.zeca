@@ -1,10 +1,15 @@
-
 fn main() {
     let x = -1;
 
     if x < 0 {
-        x;
+        x = x + 1;
+        if x == 0 {
+            x = x + 5;
+        } else {
+            x = -10;
+        }
     } else {
         -x;
     }
+    x;
 }
