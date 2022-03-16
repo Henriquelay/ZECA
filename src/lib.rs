@@ -72,21 +72,21 @@ fn eval_expr<'a>(
         Expr::Neg(a) => match eval_expr(a, vars, funcs)? {
             Literal::Num(x) => Ok(Literal::Num(-x)),
             Literal::Bool(x) => Ok(Literal::Bool(!x)),
-            _ => Err(format!("Cannot apply negation")),
+            _ => Err("Cannot apply negation".to_string()),
         },
         Expr::And(a, b) => match (eval_expr(a, vars, funcs)?, eval_expr(b, vars, funcs)?) {
             (Literal::Num(x), Literal::Num(y)) => Ok(Literal::Bool(
                 x > Number::UInteger(1) && y > Number::UInteger(1),
             )),
             (Literal::Bool(x), Literal::Bool(y)) => Ok(Literal::Bool(x && y)),
-            _ => Err(format!("Cannot apply AND")),
+            _ => Err("Cannot apply AND".to_string()),
         },
         Expr::Or(a, b) => match (eval_expr(a, vars, funcs)?, eval_expr(b, vars, funcs)?) {
             (Literal::Num(x), Literal::Num(y)) => Ok(Literal::Bool(
                 x > Number::UInteger(1) || y > Number::UInteger(1),
             )),
             (Literal::Bool(x), Literal::Bool(y)) => Ok(Literal::Bool(x || y)),
-            _ => Err(format!("Cannot apply OR")),
+            _ => Err("Cannot apply OR".to_string()),
         },
         Expr::Add(a, b) => Ok(Literal::Num({
             let left = eval_expr(a, vars, funcs)?;
@@ -187,15 +187,14 @@ fn eval<'a>(
             }),
             Statement::Loop(r#loop) => match *r#loop {
                 Loop(blk) => Ok(loop {
-                    let last_eval = eval(&blk, vars, funcs, true)?;
-                    if last_eval == Literal::Break {
-                        break last_eval;
-                    };
+                    println!("Churusplangos");
+                    if let Literal::Break = eval(&blk, vars, funcs, true)? {
+                        println!("Churusplingos");
+                        break Literal::Null;
+                    }
                 }),
             },
-            Statement::Item(item) => match item {
-                _ => todo!(), // Nested items are not yet implemented
-            },
+            Statement::Item(_item) => todo!(),
             Statement::Conditional {
                 r#if,
                 r#then,
@@ -204,24 +203,20 @@ fn eval<'a>(
                 if let Literal::Bool(cond) = eval_expr(&r#if, vars, funcs)? {
                     if cond {
                         Ok(eval(&r#then, vars, funcs, false)?)
+                    } else if let Some(r#else) = r#else {
+                        Ok(eval(&r#else, vars, funcs, false)?)
                     } else {
-                        if let Some(r#else) = r#else {
-                            Ok(eval(&r#else, vars, funcs, false)?)
-                        } else {
-                            Ok(Literal::Null)
-                        }
+                        Ok(Literal::Null)
                     }
                 } else {
-                    Err(format!(
-                        "Conditional's condition is not a boolean expression"
-                    ))
+                    Err("Conditional's condition is not a boolean expression".to_string())
                 }
             }
             Statement::Let { lvalue, rvalue } => {
                 // Evaluates RHS first
                 let rvalue = eval_expr(&rvalue, vars, funcs)?;
                 // Pushes name into variable symbol table
-                // TODO shadones
+                // TODO shadones (se já tiver no vec, só coloca no final)
                 vars.last_mut()
                     .unwrap()
                     .insert(lvalue.clone(), vec![rvalue.clone()]);
@@ -236,7 +231,11 @@ fn eval<'a>(
                 Ok(new_value)
             }
             Statement::Null => Ok(Literal::Null),
-        })
+        });
+        match last_statement {
+            Some(Ok(Literal::Break)) => break,
+            _ => continue,
+        }
     }
     Ok(last_statement.unwrap().unwrap())
 }
@@ -250,9 +249,10 @@ pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
             let mut funcs: HashMap<String, &Function> = HashMap::new();
             for item in ast.iter() {
                 match item {
-                    Item::Function(f) => funcs.insert(f.clone().name, &f),
+                    Item::Function(f) => funcs.insert(f.name.clone(), &f),
                 };
             }
+            // Searching for function called `main` 
             if let Some(Item::Function(main)) = ast.iter().find(|&item| match item {
                 Item::Function(Function {
                     name,
@@ -261,13 +261,13 @@ pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
                 }) => name == "main",
             }) {
                 // Evaluate `main(){ }
-                match eval(&main.body, &mut vec![HashMap::new()], &mut funcs, false) {
+                match eval(&main.body, &mut vec![HashMap::new()], &funcs, false) {
                     Ok(output) => Ok(output),
                     Err(eval_err) => Err(vec![format!("Evaluation error: {:?}", eval_err)]),
                 }
             } else {
                 Err(vec![
-                    "Syntax error: No function named `main` in top-level items.".to_string(),
+                    "Syntax error: No function named `main` in top-level items. Can't continue.".to_string(),
                 ])
             }
         }

@@ -45,5 +45,5 @@ where
 {
     ok(parser.clone(), ok_entry);
 
-    err(parser.clone(), bad_entry);
+    err(parser, bad_entry);
 }

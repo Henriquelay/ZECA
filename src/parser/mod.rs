@@ -53,7 +53,7 @@ pub fn float_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + 
         .map(|s: (String, Option<String>)| {
             Expr::Literal(Literal::Num(Number::Float(
                 // The number after the dot can be omitted (e.g.: "2." is a float)
-                format!("{}.{}", s.0, s.1.unwrap_or("".to_string()))
+                format!("{}.{}", s.0, s.1.unwrap_or_else(|| "".to_string()))
                     .parse()
                     .unwrap(),
             )))
@@ -143,7 +143,7 @@ pub fn statement_block_item_loop_parser() -> (
             .padded()
             .repeated()
             .padded()
-            .map(|s| Block(s));
+            .map(Block);
         let block_inner = block_content.clone().delimited_by(just("{"), just("}"));
         block = Some(block_inner.clone());
 
@@ -174,11 +174,7 @@ pub fn statement_block_item_loop_parser() -> (
                     .or_not(),
             )
             .map(|((expr, ifblock), elseblock)| {
-                let elseblock_wrapped = if let Some(elseblock_unwrap) = elseblock {
-                    Some(Box::new(elseblock_unwrap))
-                } else {
-                    None
-                };
+                let elseblock_wrapped = elseblock.map(Box::new);
                 Statement::Conditional {
                     r#if: Box::new(expr),
                     r#then: Box::new(ifblock),
@@ -194,6 +190,10 @@ pub fn statement_block_item_loop_parser() -> (
 
         r#let
             .or(assign)
+            .or(just("break")
+                .ignore_then(just(";").or_not())
+                .ignored()
+                .map(|_| Statement::Break))
             .or(expr
                 .map(|s| Statement::Expr(Box::new(s)))
                 .then_ignore(just(";")))

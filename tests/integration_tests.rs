@@ -62,7 +62,6 @@ fn loop_forever() {
 }
 
 #[test]
-#[ignore]
 fn loop_breaks() {
     let expected_value = 10;
     let val = parse_file("tests/examples/good/loop.zeca");
