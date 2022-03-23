@@ -22,7 +22,7 @@ macro_rules! for_every_number_Value {
         match $expr {
             (Literal::Num(n), Literal::Num(o)) => match (n, o) {
                 (Number::Integer(x), Number::Integer(y)) => $clj(x, y),
-                (Number::UInteger(x), Number::UInteger(y)) => $clj(x, y),
+                // (Number::UInteger(x), Number::UInteger(y)) => $clj(x, y),
                 (Number::Float(x), Number::Float(y)) => $clj(x, y),
                 _ => unimplemented!(),
             },
@@ -36,7 +36,7 @@ macro_rules! for_every_number_Value_wrapped {
         match $expr {
             (Literal::Num(n), Literal::Num(o)) => match (n, o) {
                 (Number::Integer(x), Number::Integer(y)) => Number::Integer($clj(x, y)),
-                (Number::UInteger(x), Number::UInteger(y)) => Number::UInteger($clj(x, y)),
+                // (Number::UInteger(x), Number::UInteger(y)) => Number::UInteger($clj(x, y)),
                 (Number::Float(x), Number::Float(y)) => Number::Float($clj(x, y)),
                 _ => unimplemented!(),
             },
@@ -48,7 +48,6 @@ macro_rules! for_every_number_Value_wrapped {
 /// Evaluates return value
 fn eval_expr<'a>(
     expr: &'a Expr,
-    // TODO replace both symbol list with actual symbol tables, not lists
     vars: &mut Vec<HashMap<String, Vec<Literal>>>,
     funcs: &HashMap<String, &Function>,
 ) -> Result<Literal, String> {
@@ -76,14 +75,14 @@ fn eval_expr<'a>(
         },
         Expr::And(a, b) => match (eval_expr(a, vars, funcs)?, eval_expr(b, vars, funcs)?) {
             (Literal::Num(x), Literal::Num(y)) => Ok(Literal::Bool(
-                x > Number::UInteger(1) && y > Number::UInteger(1),
+                x > Number::Integer(1) && y > Number::Integer(1),
             )),
             (Literal::Bool(x), Literal::Bool(y)) => Ok(Literal::Bool(x && y)),
             _ => Err("Cannot apply AND".to_string()),
         },
         Expr::Or(a, b) => match (eval_expr(a, vars, funcs)?, eval_expr(b, vars, funcs)?) {
             (Literal::Num(x), Literal::Num(y)) => Ok(Literal::Bool(
-                x > Number::UInteger(1) || y > Number::UInteger(1),
+                x > Number::Integer(1) || y > Number::Integer(1),
             )),
             (Literal::Bool(x), Literal::Bool(y)) => Ok(Literal::Bool(x || y)),
             _ => Err("Cannot apply OR".to_string()),
@@ -108,7 +107,7 @@ fn eval_expr<'a>(
             let right = eval_expr(b, vars, funcs)?;
             for_every_number_Value_wrapped!((left, right), |x, y| x / y)
         })),
-        Expr::Var(name) => {
+        Expr::Var { name, index } => {
             // Searches the variable on variables symbol table that matches name with invoked variable
             let mut retval = None;
             for scope_vars in vars.iter().rev() {
@@ -123,7 +122,27 @@ fn eval_expr<'a>(
                     retval = Some(Err(format!("Cannot find variable `{}`", name)));
                 }
             }
+
+            // If index is some, return value at index, if value is array
+            if let &Expr::Literal(Literal::Num(Number::Integer(index_number))) = index.as_ref() {
+                if index_number > 0 {
+                    if let Literal::Array(array) = retval.unwrap().unwrap() {
+                        retval = Some(Ok(array[index_number as usize].clone()))
+                    } else {
+                        retval = Some(Err("Cannot index non-array".to_string()))
+                    }
+                }
+            } else {
+                retval = Some(Err("Cannot index with valu less than zero".to_string()));
+            }
             retval.unwrap()
+        }
+        Expr::Array(array) => {
+            let mut retval = Vec::new();
+            for expr in array {
+                retval.push(eval_expr(expr, vars, funcs)?);
+            }
+            Ok(Literal::Array(retval))
         }
         Expr::Call(name, call_args) => {
             // Retrieve the callee signature
@@ -170,7 +189,6 @@ fn eval_expr<'a>(
 /// Evaluates return value for block
 fn eval<'a>(
     blk: &'a Block,
-    // TODO replace both symbol list with actual symbol tables, not lists
     vars: &mut Vec<HashMap<String, Vec<Literal>>>,
     funcs: &HashMap<String, &Function>,
     is_loop: bool,
@@ -247,7 +265,7 @@ pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
             let mut funcs: HashMap<String, &Function> = HashMap::new();
             for item in ast.iter() {
                 match item {
-                    Item::Function(f) => funcs.insert(f.name.clone(), &f),
+                    Item::Function(f) => funcs.insert(f.name.clone(), &Box::new(f)),
                 };
             }
             // Searching for function called `main`

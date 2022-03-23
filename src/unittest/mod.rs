@@ -216,6 +216,33 @@ pub fn string() {
 }
 
 #[test]
+pub fn assign() {
+    test_util::tests(
+        |s| {
+            crate::parser::assignment_parser()
+                .then_ignore(end())
+                .parse_recovery_verbose(s)
+        },
+        vec![
+            r#"x = 10;"#,
+            r#"x = -10;"#,
+            r#"complicated_name = 0.1;"#,
+            r#"a = true;"#,
+            r#"a = "strings";"#,
+            r#"a = [];"#,
+            r#"a = [1];"#,
+            r#"a = [1, 2, 3];"#,
+            r#"a = another_variable;"#,
+        ],
+        vec![
+            r#"let a = "#,
+            r#"name with space = "#,
+            r#"array[index] = "#, // TODO not yet implemented
+        ],
+    );
+}
+
+#[test]
 pub fn expr() {
     test_util::tests(
         |s| {
@@ -260,6 +287,11 @@ pub fn expr() {
             "5 || -3",
             // Str
             r#""str são literals e portanto ainda estão dentro de expr.""#,
+            // Array
+            r#"array[2]"#,
+            r#"array[2 + 3]"#,
+            r#"array[array_index]"#,
+            r#"array[array_index + array_indexes[2]] + array[array_index + array_indexes[3]]"#,
         ],
         vec![
             "1+",

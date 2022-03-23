@@ -18,9 +18,20 @@ fn simple() {
     let val = parse_file("tests/examples/good/simple.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
-        _ => panic!("Returned value is not a Literal::Num(Number::Float())"),
+        _ => panic!("Returned value is not a Float type"),
     };
     assert!(f64::abs(val - expected_value) < delta);
+}
+
+#[test]
+fn array() {
+    let expected_value = 10;
+    let val = parse_file("tests/examples/good/array.zeca");
+    let val = match val {
+        Literal::Num(Number::Integer(x)) => x,
+        _ => panic!("Returned value is not a Integer type"),
+    };
+    assert!(val == expected_value);
 }
 
 // FIXME block need to return eval of last element
@@ -31,7 +42,7 @@ fn negation() {
     let val = parse_file("tests/examples/good/neg.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
-        _ => panic!("Returned value is not a Literal::Num(Number::Float())"),
+        _ => panic!("Returned value is not a Float type"),
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
@@ -42,8 +53,9 @@ fn assign() {
     let val = parse_file("tests/examples/good/assign.zeca");
     let val = match val {
         Literal::Num(Number::Integer(x)) => x,
-        _ => panic!(),
+        _ => panic!("Expected value is not Integer type"),
     };
+    println!("VAL:> {}", val);
     assert!(val == expected_value);
 }
 
@@ -56,7 +68,7 @@ fn loop_forever() {
     let val = parse_file("tests/examples/good/loop.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
-        _ => panic!(),
+        _ => panic!("Expected value is not Float type"),
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
@@ -67,7 +79,7 @@ fn loop_breaks() {
     let val = parse_file("tests/examples/good/loop.zeca");
     let val = match val {
         Literal::Num(Number::Integer(x)) => x,
-        _ => panic!(),
+        _ => panic!("Expected value is not Integer type"),
     };
     assert!(val == expected_value);
 }
@@ -89,7 +101,7 @@ fn full_test_1() {
     let val = parse_file("tests/examples/good/full_test_1.zeca");
     let val = match val {
         Literal::Num(Number::Integer(x)) => x,
-        _ => panic!(),
+        _ => panic!("Expected value is not Integer type"),
     };
     assert!(expected_value == val);
 }
@@ -101,7 +113,7 @@ fn expr_simple() {
     let val = parse_file("tests/examples/good/expr_simple.zeca");
     let val = match val {
         Literal::Num(Number::Float(x)) => x,
-        _ => panic!("Returned value is not a Literal::Num(Number::Float())"),
+        _ => panic!("Returned value is not Float type"),
     };
     assert!(f64::abs(val - expected_value) < delta);
 }
@@ -112,7 +124,7 @@ fn string() {
     let val = parse_file("tests/examples/good/string.zeca");
     let val = match val {
         Literal::Str(x) => x,
-        _ => panic!("Returned value is not a string"),
+        _ => panic!("Returned value is not a string type"),
     };
     assert!(val == expected_value);
 }
@@ -123,7 +135,7 @@ fn bool() {
     let val = parse_file("tests/examples/good/bool.zeca");
     let val = match val {
         Literal::Bool(x) => x,
-        _ => panic!("Value is not a boolean"),
+        _ => panic!("Value is not a boolean type"),
     };
     assert!(expected_value == val);
 }

@@ -13,6 +13,8 @@ pub enum Literal {
     Str(String),
     /// Function variables
     Fn(Function),
+    /// Array of literals
+    Array(Vec<Literal>),
     /// Break special value
     Break,
 }
@@ -46,10 +48,18 @@ pub enum Expr {
     /// Expr1 || Expr2. >0 is truthy
     Or(Box<Expr>, Box<Expr>),
 
+    /// Declare an array of expressions
+    Array(Vec<Expr>),
+
     /// Function call expression. `()` operator placed after a symbol, as in `foo()`
     Call(String, Vec<Expr>),
-    /// Variable invocation
-    Var(String),
+    /// Variable invocation. Index is for array variable
+    Var {
+        /// Name of the variable
+        name: String,
+        /// Index offset from start of the array. If `[]` is not used, this is defaulted to `0`.
+        index: Box<Expr>,
+    },
 }
 
 /// Types for ZECA's expressions. Uses mostly native Rust types
@@ -58,7 +68,7 @@ pub enum Number {
     /// Fake numbers. -1, 0, 1
     Integer(isize),
     /// Unsigned integer numbers. 0, 1, 2
-    UInteger(usize),
+    // UInteger(usize),
     /// Real numbers
     Float(f64),
 }
@@ -70,7 +80,7 @@ impl std::ops::Neg for Number {
         match self {
             Self::Integer(x) => Self::Integer(-x),
             // Notice the casting
-            Self::UInteger(x) => Self::Integer(-(x as isize)),
+            // Self::UInteger(x) => Self::Integer(-(x as isize)),
             Self::Float(x) => Self::Float(-x),
         }
     }

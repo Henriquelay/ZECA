@@ -38,7 +38,17 @@ pub fn identifier_parser(
 pub fn integer_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy + Clone {
     // Parse for base 10
     text::int(10)
-        .map(|s: String| Expr::Literal(Literal::Num(Number::Integer(s.parse().unwrap()))))
+        .map(|s: String| {
+            Expr::Literal(Literal::Num(Number::Integer(s.parse().unwrap())))
+            // Expr::Literal(Literal::Num({
+            //     let int = s.parse::<usize>();
+            //     if let Ok(int) = int {
+            //         Number::UInteger(int)
+            //     } else {
+            //         Number::Integer(s.parse::<isize>().expect("Error parsing integer literal"))
+            //     }
+            // }))
+        })
         .padded()
 }
 
@@ -83,6 +93,18 @@ pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
 // }
 // Non-terminal (Composite types) {
 
+/// Parses an variable assignment
+pub fn assignment_parser() -> impl Parser<char, Statement, Error = Simple<char>> + Clone {
+    identifier_parser()
+        .then_ignore(just('='))
+        .then(expr_parser())
+        .then_ignore(just(";"))
+        .map(|(lvalue, rvalue)| Statement::Assign {
+            lvalue,
+            rvalue: Box::new(rvalue),
+        })
+}
+
 /// Statement-block-item parser. It parses all three, and are nested together because of the recursive nature of them (statement may be a block, a block is made of statements and items, with are made of functions which includes blocks etc.)
 /// The parsers need to be individually extracted because of their interdependance, where a parse some of the other parser depends on can go out of scope, getting the value dropped. So, this functions returns all of them in a tuple
 /// This is not less performant, because the other parsers would need to be evaluated anyway, since they are interdependant
@@ -104,7 +126,7 @@ pub fn string_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Copy +
 /// - No support for nested functions
 ///
 /// A Loop is a controle structure to repeat determined Statements, or, more precisely, a Block.
-/// TODO does it had break implementation? Document it here.
+/// A `break` statement may be placed to stop looping.
 pub fn statement_block_item_loop_parser() -> (
     impl Parser<char, Statement, Error = Simple<char>> + Clone,
     impl Parser<char, Block, Error = Simple<char>> + Clone,
@@ -114,15 +136,8 @@ pub fn statement_block_item_loop_parser() -> (
     let identifier = identifier_parser();
     let comment = comment_parser();
     let expr = expr_parser();
+    let assign = assignment_parser();
 
-    let assign = identifier
-        .then_ignore(just('='))
-        .then(expr.clone())
-        .then_ignore(just(";"))
-        .map(|(lvalue, rvalue)| Statement::Assign {
-            lvalue,
-            rvalue: Box::new(rvalue),
-        });
     let r#let = text::keyword("let")
         .ignored()
         .then(assign.clone())
@@ -215,6 +230,7 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
     let string = string_parser();
     let number = number_parser();
     let boolean = boolean_parser();
+
     recursive(|expr| {
         let call = identifier
             .then(
@@ -225,14 +241,30 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
                     .delimited_by(just('('), just(')')),
             )
             .map(|(f, args)| Expr::Call(f, args));
+        let array_index = expr
+            .clone()
+            .padded()
+            .separated_by(just(','))
+            .delimited_by(just('['), just(']'))
+            .map(Expr::Array);
 
         let atom = expr
+            .clone()
             .delimited_by(just('('), just(')'))
             .or(string)
             .or(boolean)
             .or(number)
             .or(call)
-            .or(identifier.map(Expr::Var));
+            .or(array_index)
+            .or(identifier
+                .then(expr.delimited_by(just('['), just(']')).or_not())
+                .map(|(name, index)| Expr::Var {
+                    name,
+                    index: Box::new(
+                        // index.unwrap_or(Expr::Literal(Literal::Num(Number::UInteger(0)))),
+                        index.unwrap_or(Expr::Literal(Literal::Num(Number::Integer(0)))),
+                    ),
+                }));
 
         let op = |c| just(c).padded();
 
@@ -289,6 +321,7 @@ pub fn expr_parser() -> impl Parser<char, Expr, Error = Simple<char>> + Clone {
         bool_algebra.padded()
     })
 }
+
 // }
 
 /// Parses the whole program for correct tokens and tokens order
