@@ -2,7 +2,7 @@
 
 Zero Efficiency Compiler: Augmented
 
-A Rust -> LLVM compiler written in Rust using [Chumsky] library.
+A Rust interpreter written in Rust using [Chumsky] library.
 
 ## Requirements
 
