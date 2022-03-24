@@ -269,13 +269,7 @@ pub fn eval_source(src: String) -> Result<Literal, Vec<String>> {
                 };
             }
             // Searching for function called `main`
-            if let Some(Item::Function(main)) = ast.iter().find(|&item| match item {
-                Item::Function(Function {
-                    name,
-                    args: _,
-                    body: _,
-                }) => name == "main",
-            }) {
+            if let Some(main) = funcs.get("main") {
                 // Evaluate `main(){ }
                 match eval(&main.body, &mut vec![HashMap::new()], &funcs, false) {
                     Ok(output) => Ok(output),
